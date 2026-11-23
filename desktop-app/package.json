@@ -1,0 +1,43 @@
+{
+  "name": "hsc-study-desktop",
+  "version": "1.0.0",
+  "description": "HSC 2028 Science 6-Month Study Plan Desktop App",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "electron .",
+    "build-win": "electron-builder --win --publish never",
+    "build-mac": "electron-builder --mac --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.hscstudyplan.desktop",
+    "productName": "HSC Study Plan",
+    "files": [
+      "index.html",
+      "styles.css",
+      "data.js",
+      "app.js",
+      "study_plan.json",
+      "electron-main.js",
+      "icon-512.png",
+      "icon.ico"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "icon-512.png"
+    }
+  }
+}

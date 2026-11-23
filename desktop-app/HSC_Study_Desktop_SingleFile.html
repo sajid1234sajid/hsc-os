@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HSC স্টাডি — ২০২৮ বিজ্ঞান (Desktop App)</title>
+  
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDggMTA4Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzBGNzY2RSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwNjRFM0IiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxMDgiIGhlaWdodD0iMTA4IiByeD0iMjQiIGZpbGw9InVybCgjYmcpIi8+CiAgPHBhdGggZmlsbD0iI0VDRkRGNSIgZD0iTTU0LDM5IEw1NCw3NSBDNDYsNzEgMzYsNzAgMjgsNzIgTDI4LDM3IEMzNiwzNSA0NiwzNiA1NCwzOSBaIi8+CiAgPHBhdGggZmlsbD0iI0E3RjNEMCIgZD0iTTU0LDM5IEw1NCw3NSBDNjIsNzEgNzIsNzAgODAsNzIgTDgwLDM3IEM3MiwzNSA2MiwzNiA1NCwzOSBaIi8+CiAgPHBhdGggZmlsbD0iI0ZCQkYyNCIgZD0iTTU0LDIyIEw1Ni44LDI4LjIgTDYzLDMxIEw1Ni44LDMzLjggTDU0LDQwIEw1MS4yLDMzLjggTDQ1LDMxIEw1MS4yLDI4LjIgWiIvPgo8L3N2Zz4K" type="image/svg+xml" />
+  <meta name="theme-color" content="#0f766e" />
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap');
+
+:root {
+  --bg: #0b1117;
+  --surface: #121b24;
+  --surface-2: #182430;
+  --surface-3: #202f3e;
+  --outline: #2e4053;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --primary: #34d399;
+  --primary-bg: rgba(52, 211, 153, 0.14);
+  --on-primary: #022c22;
+  --secondary: #fbbf24;
+  --secondary-bg: rgba(251, 191, 36, 0.14);
+  --tertiary: #38bdf8;
+  --error: #fb7185;
+  --error-bg: rgba(251, 113, 133, 0.16);
+  --radius: 16px;
+}
+
+body.light {
+  --bg: #f6f8fa;
+  --surface: #ffffff;
+  --surface-2: #eef2f6;
+  --surface-3: #e2e8f0;
+  --outline: #cbd5e1;
+  --text: #0f172a;
+  --muted: #475569;
+  --primary: #059669;
+  --primary-bg: rgba(5, 150, 105, 0.12);
+  --on-primary: #ffffff;
+  --secondary: #d97706;
+  --secondary-bg: rgba(217, 119, 6, 0.12);
+  --tertiary: #0284c7;
+  --error: #e11d48;
+  --error-bg: rgba(225, 29, 72, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans Bengali', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--outline);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px;
+}
+
+.brand img {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.brand-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.brand-sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.96rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.nav-btn.active {
+  background: var(--primary-bg);
+  color: var(--primary);
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--outline);
+}
+
+.pill-row {
+  display: flex;
+  gap: 8px;
+}
+
+.main-area {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--outline);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.content {
+  padding: 20px 24px 40px;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.desktop-split {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.roadmap-split {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.card.hero {
+  background: linear-gradient(135deg, var(--primary-bg), var(--surface));
+}
+
+.card.overdue {
+  border-color: var(--error);
+  background: linear-gradient(135deg, var(--error-bg), var(--surface));
+}
+
+.card.current-week {
+  border-color: var(--primary);
+}
+
+.card.running {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.badge.primary {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.badge.error {
+  background: var(--error);
+  color: #fff;
+}
+
+.badge.warn {
+  background: var(--secondary-bg);
+  color: var(--secondary);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--outline);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--surface-3);
+}
+
+.btn.primary {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: transparent;
+}
+
+.btn.danger {
+  background: var(--error-bg);
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.btn.small {
+  min-height: 38px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.chip {
+  min-height: 40px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--outline);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip.active {
+  background: var(--primary-bg);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--outline);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.94rem;
+}
+
+.timer-readout {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Bengali', monospace;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.progress-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.phase-bars {
+  display: grid;
+  grid-template-columns: 50fr 20fr 8fr;
+  gap: 6px;
+}
+
+.phase-bars .progress-track {
+  height: 8px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--outline);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.check-row.checked {
+  background: var(--primary-bg);
+  border-color: rgba(52, 211, 153, 0.45);
+}
+
+.check-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.subject-item {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--outline);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.subject-item.active {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 50;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 500px;
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  border-radius: 20px;
+  padding: 20px;
+}
+
+@media (max-width: 960px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--outline);
+  }
+  .nav-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .nav-btn {
+    width: auto;
+  }
+  .desktop-split,
+  .roadmap-split,
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDggMTA4Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzBGNzY2RSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwNjRFM0IiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxMDgiIGhlaWdodD0iMTA4IiByeD0iMjQiIGZpbGw9InVybCgjYmcpIi8+CiAgPHBhdGggZmlsbD0iI0VDRkRGNSIgZD0iTTU0LDM5IEw1NCw3NSBDNDYsNzEgMzYsNzAgMjgsNzIgTDI4LDM3IEMzNiwzNSA0NiwzNiA1NCwzOSBaIi8+CiAgPHBhdGggZmlsbD0iI0E3RjNEMCIgZD0iTTU0LDM5IEw1NCw3NSBDNjIsNzEgNzIsNzAgODAsNzIgTDgwLDM3IEM3MiwzNSA2MiwzNiA1NCwzOSBaIi8+CiAgPHBhdGggZmlsbD0iI0ZCQkYyNCIgZD0iTTU0LDIyIEw1Ni44LDI4LjIgTDYzLDMxIEw1Ni44LDMzLjggTDU0LDQwIEw1MS4yLDMzLjggTDQ1LDMxIEw1MS4yLDI4LjIgWiIvPgo8L3N2Zz4K" alt="HSC Study Logo" />
+        <div>
+          <div class="brand-title" id="brandTitle">HSC ২০২৮ বিজ্ঞান</div>
+          <div class="brand-sub" id="brandSub">২৬ সপ্তাহের স্টাডি প্ল্যান</div>
+        </div>
+      </div>
+
+      <nav class="nav-list" id="navList"></nav>
+
+      <div class="sidebar-footer">
+        <div class="pill-row">
+          <button class="btn small" id="langToggleBtn" style="flex:1">বাংলা / EN</button>
+          <button class="btn small" id="themeToggleBtn" style="flex:1">🌙 / ☀️</button>
+        </div>
+        <div class="muted" id="sidebarCountdown"></div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <h1 id="pageTitle">আজ</h1>
+        <div class="row">
+          <span class="badge primary" id="topbarWeekBadge"></span>
+          <button class="btn small" id="installPromptBtn" style="display:none">ডেস্কটপ অ্যাপ ইনস্টল</button>
+        </div>
+      </header>
+
+      <section class="content" id="mainContent"></section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal-card" id="modalCard"></div>
+  </div>
+
+  <script>
+window.STUDY_PLAN = {
+  "plan": {
+    "titleBn": "HSC ২০২৮ — বিজ্ঞান ৬ মাসের স্টাডি প্ল্যান",
+    "titleEn": "HSC 2028 — Science 6-Month Study Plan",
+    "startDate": "2026-11-24",
+    "endDate": "2027-05-23",
+    "totalWeeks": 26,
+    "defaultDailyHours": 5,
+    "sessionsPerDay": 4,
+    "sessionMinutes": 75,
+    "phaseMinutes": {
+      "newTopic": 50,
+      "practice": 20,
+      "recall": 5
+    },
+    "weeklyGoalMinPercent": 80,
+    "weeklyGoalMaxPercent": 90
+  },
+  "statuses": [
+    { "id": "NOT_STARTED", "bn": "শুরু হয়নি", "en": "Not started" },
+    { "id": "IN_PROGRESS", "bn": "চলছে", "en": "In progress" },
+    { "id": "FIRST_READING_DONE", "bn": "প্রথমবার পড়া শেষ", "en": "First reading done" },
+    { "id": "PRACTICE_DONE", "bn": "অনুশীলন শেষ", "en": "Practice done" },
+    { "id": "REVISION_DONE", "bn": "রিভিশন শেষ", "en": "Revision done" },
+    { "id": "EXAM_TAKEN", "bn": "পরীক্ষা দেওয়া হয়েছে", "en": "Exam taken" }
+  ],
+  "weeklyMandatoryTasks": [
+    { "id": "task_1", "bn": "নির্ধারিত অধ্যায় বা পাঠের মূল অংশ শেষ করা।", "en": "Complete the core part of assigned chapters or lessons." },
+    { "id": "task_2", "bn": "গুরুত্বপূর্ণ সংজ্ঞা ও সূত্র নোট করা।", "en": "Write notes of key definitions and formulas." },
+    { "id": "task_3", "bn": "MCQ অনুশীলন করা।", "en": "Practice MCQ questions." },
+    { "id": "task_4", "bn": "সৃজনশীল বা লিখিত প্রশ্ন অনুশীলন করা।", "en": "Practice creative (CQ) or written questions." },
+    { "id": "task_5", "bn": "আগের সপ্তাহের পড়া অন্তত একবার রিভিশন করা।", "en": "Revise last week's lessons at least once." },
+    { "id": "task_6", "bn": "শুক্রবার সাপ্তাহিক পরীক্ষা দেওয়া।", "en": "Take the Friday weekly exam." },
+    { "id": "task_7", "bn": "ভুল প্রশ্নগুলো আলাদা ভুলের খাতায় লিখে রাখা।", "en": "Record wrong answers in the Mistake Notebook." }
+  ],
+  "fridayExamChecklist": [
+    { "id": "fri_1", "bn": "পদার্থবিজ্ঞান পরীক্ষা (সপ্তাহের পড়া অংশের ওপর)", "en": "Physics Exam (on this week's syllabus)" },
+    { "id": "fri_2", "bn": "উচ্চতর গণিত পরীক্ষা (সপ্তাহের অঙ্ক ও সূত্র)", "en": "Higher Math Exam (this week's problems & formulas)" },
+    { "id": "fri_3", "bn": "রসায়ন ও জীববিজ্ঞান পরীক্ষা (MCQ + সৃজনশীল)", "en": "Chemistry & Biology Exam (MCQ + CQ)" },
+    { "id": "fri_4", "bn": "বাংলা, ইংরেজি ও ICT রিভিশন", "en": "Bangla, English & ICT Revision" }
+  ],
+  "weeklyRoutine": {
+    "SATURDAY": [
+      { "slot": 1, "group": "physics", "labelBn": "পদার্থবিজ্ঞান", "labelEn": "Physics" },
+      { "slot": 2, "group": "higher_math", "labelBn": "উচ্চতর গণিত", "labelEn": "Higher Math" },
+      { "slot": 3, "group": "chemistry", "labelBn": "রসায়ন", "labelEn": "Chemistry" },
+      { "slot": 4, "group": "english", "labelBn": "ইংরেজি", "labelEn": "English" }
+    ],
+    "SUNDAY": [
+      { "slot": 1, "group": "biology", "labelBn": "জীববিজ্ঞান", "labelEn": "Biology" },
+      { "slot": 2, "group": "higher_math", "labelBn": "উচ্চতর গণিত", "labelEn": "Higher Math" },
+      { "slot": 3, "group": "physics", "labelBn": "পদার্থবিজ্ঞান", "labelEn": "Physics" },
+      { "slot": 4, "group": "bangla", "labelBn": "বাংলা", "labelEn": "Bangla" }
+    ],
+    "MONDAY": [
+      { "slot": 1, "group": "chemistry", "labelBn": "রসায়ন", "labelEn": "Chemistry" },
+      { "slot": 2, "group": "biology", "labelBn": "জীববিজ্ঞান", "labelEn": "Biology" },
+      { "slot": 3, "group": "ict", "labelBn": "ICT", "labelEn": "ICT" },
+      { "slot": 4, "group": "english", "labelBn": "ইংরেজি", "labelEn": "English" }
+    ],
+    "TUESDAY": [
+      { "slot": 1, "group": "physics", "labelBn": "পদার্থবিজ্ঞান", "labelEn": "Physics" },
+      { "slot": 2, "group": "higher_math", "labelBn": "উচ্চতর গণিত", "labelEn": "Higher Math" },
+      { "slot": 3, "group": "chemistry", "labelBn": "রসায়ন", "labelEn": "Chemistry" },
+      { "slot": 4, "group": "bangla", "labelBn": "বাংলা", "labelEn": "Bangla" }
+    ],
+    "WEDNESDAY": [
+      { "slot": 1, "group": "biology", "labelBn": "জীববিজ্ঞান", "labelEn": "Biology" },
+      { "slot": 2, "group": "higher_math", "labelBn": "উচ্চতর গণিত", "labelEn": "Higher Math" },
+      { "slot": 3, "group": "ict", "labelBn": "ICT", "labelEn": "ICT" },
+      { "slot": 4, "group": "english", "labelBn": "ইংরেজি", "labelEn": "English" }
+    ],
+    "THURSDAY": [
+      { "slot": 1, "group": "physics", "labelBn": "পদার্থবিজ্ঞান", "labelEn": "Physics" },
+      { "slot": 2, "group": "chemistry", "labelBn": "রসায়ন", "labelEn": "Chemistry" },
+      { "slot": 3, "group": "biology", "labelBn": "জীববিজ্ঞান", "labelEn": "Biology" },
+      { "slot": 4, "group": "bangla", "labelBn": "বাংলা", "labelEn": "Bangla" }
+    ],
+    "FRIDAY": [
+      { "slot": 1, "group": "physics", "labelBn": "পদার্থবিজ্ঞান পরীক্ষা", "labelEn": "Physics Weekly Exam" },
+      { "slot": 2, "group": "higher_math", "labelBn": "উচ্চতর গণিত পরীক্ষা", "labelEn": "Higher Math Weekly Exam" },
+      { "slot": 3, "group": "chemistry_biology", "labelBn": "রসায়ন ও জীববিজ্ঞান পরীক্ষা", "labelEn": "Chemistry & Biology Exam" },
+      { "slot": 4, "group": "bangla_english_ict", "labelBn": "বাংলা, ইংরেজি ও ICT রিভিশন", "labelEn": "Bangla, English & ICT Revision" }
+    ]
+  },
+  "subjects": [
+    {
+      "id": "physics",
+      "group": "physics",
+      "nameBn": "পদার্থবিজ্ঞান",
+      "nameEn": "Physics",
+      "chapterCountLabel": "২০ অধ্যায়",
+      "noteBn": "১ম ও ২য় পত্র (২০ অধ্যায়) + ৬ সপ্তাহ রিভিশন ও পরীক্ষা",
+      "chapters": [
+        { "id": "phy_1", "paper": "১ম পত্র", "startWeek": 1, "weekNumber": 1, "title": "ভৌতজগৎ ও পরিমাপ", "deadline": "2026-11-30" },
+        { "id": "phy_2", "paper": "১ম পত্র", "startWeek": 2, "weekNumber": 2, "title": "ভেক্টর", "deadline": "2026-12-07" },
+        { "id": "phy_3", "paper": "১ম পত্র", "startWeek": 3, "weekNumber": 3, "title": "গতিবিদ্যা", "deadline": "2026-12-14" },
+        { "id": "phy_4", "paper": "১ম পত্র", "startWeek": 4, "weekNumber": 4, "title": "নিউটনীয় বলবিদ্যা", "deadline": "2026-12-21" },
+        { "id": "phy_5", "paper": "১ম পত্র", "startWeek": 5, "weekNumber": 5, "title": "কাজ, শক্তি ও ক্ষমতা", "deadline": "2026-12-28" },
+        { "id": "phy_6", "paper": "১ম পত্র", "startWeek": 6, "weekNumber": 6, "title": "মহাকর্ষ ও অভিকর্ষ", "deadline": "2027-01-04" },
+        { "id": "phy_7", "paper": "১ম পত্র", "startWeek": 7, "weekNumber": 7, "title": "পদার্থের গাঠনিক ধর্ম", "deadline": "2027-01-11" },
+        { "id": "phy_8", "paper": "১ম পত্র", "startWeek": 8, "weekNumber": 8, "title": "পর্যায়বৃত্ত গতি", "deadline": "2027-01-18" },
+        { "id": "phy_9", "paper": "১ম পত্র", "startWeek": 9, "weekNumber": 9, "title": "তরঙ্গ", "deadline": "2027-01-25" },
+        { "id": "phy_10", "paper": "১ম পত্র", "startWeek": 10, "weekNumber": 10, "title": "আদর্শ গ্যাস ও গ্যাসের গতিতত্ত্ব", "deadline": "2027-02-01" },
+        { "id": "phy_11", "paper": "২য় পত্র", "startWeek": 11, "weekNumber": 11, "title": "তাপগতিবিদ্যা", "deadline": "2027-02-08" },
+        { "id": "phy_12", "paper": "২য় পত্র", "startWeek": 12, "weekNumber": 12, "title": "স্থির তড়িৎ", "deadline": "2027-02-15" },
+        { "id": "phy_13", "paper": "২য় পত্র", "startWeek": 13, "weekNumber": 13, "title": "চল তড়িৎ", "deadline": "2027-02-22" },
+        { "id": "phy_14", "paper": "২য় পত্র", "startWeek": 14, "weekNumber": 14, "title": "তড়িৎ প্রবাহের চৌম্বকীয় ক্রিয়া ও চুম্বকত্ব", "deadline": "2027-03-01" },
+        { "id": "phy_15", "paper": "২য় পত্র", "startWeek": 15, "weekNumber": 15, "title": "তড়িৎচৌম্বকীয় আবেশ ও পরিবর্তী প্রবাহ", "deadline": "2027-03-08" },
+        { "id": "phy_16", "paper": "২য় পত্র", "startWeek": 16, "weekNumber": 16, "title": "জ্যামিতিক আলোকবিজ্ঞান", "deadline": "2027-03-15" },
+        { "id": "phy_17", "paper": "২য় পত্র", "startWeek": 17, "weekNumber": 17, "title": "ভৌত আলোকবিজ্ঞান", "deadline": "2027-03-22" },
+        { "id": "phy_18", "paper": "২য় পত্র", "startWeek": 18, "weekNumber": 18, "title": "আধুনিক পদার্থবিজ্ঞানের সূচনা", "deadline": "2027-03-29" },
+        { "id": "phy_19", "paper": "২য় পত্র", "startWeek": 19, "weekNumber": 19, "title": "পরমাণুর মডেল ও নিউক্লীয় পদার্থবিজ্ঞান", "deadline": "2027-04-05" },
+        { "id": "phy_20", "paper": "২য় পত্র", "startWeek": 20, "weekNumber": 20, "title": "সেমিকন্ডাক্টর ও ইলেকট্রনিক্স", "deadline": "2027-04-12" },
+        { "id": "phy_21", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 21, "weekNumber": 21, "title": "১ম পত্র সম্পূর্ণ রিভিশন", "deadline": "2027-04-19" },
+        { "id": "phy_22", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 22, "weekNumber": 22, "title": "২য় পত্র সম্পূর্ণ রিভিশন", "deadline": "2027-04-26" },
+        { "id": "phy_23", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 23, "weekNumber": 23, "title": "দুই পত্রের পূর্ণাঙ্গ পরীক্ষা", "deadline": "2027-05-03" },
+        { "id": "phy_24", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 24, "weekNumber": 24, "title": "দুর্বল অধ্যায় পুনরায় পড়া", "deadline": "2027-05-10" },
+        { "id": "phy_25", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 25, "weekNumber": 25, "title": "MCQ ও লিখিত অনুশীলন", "deadline": "2027-05-17" },
+        { "id": "phy_26", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 26, "weekNumber": 26, "title": "ফাইনাল মডেল টেস্ট", "deadline": "2027-05-23" }
+      ]
+    },
+    {
+      "id": "higher_math",
+      "group": "higher_math",
+      "nameBn": "উচ্চতর গণিত",
+      "nameEn": "Higher Math",
+      "chapterCountLabel": "২০ অধ্যায়",
+      "noteBn": "প্রতিদিন অঙ্ক অনুশীলন ও সূত্র/উদাহরণ আলাদা খাতায় লিখতে হবে।",
+      "chapters": [
+        { "id": "hm_1", "paper": "১ম পত্র", "startWeek": 1, "weekNumber": 1, "title": "ম্যাট্রিক্স ও নির্ণায়ক", "deadline": "2026-11-30" },
+        { "id": "hm_2", "paper": "১ম পত্র", "startWeek": 2, "weekNumber": 2, "title": "ভেক্টর", "deadline": "2026-12-07" },
+        { "id": "hm_3", "paper": "১ম পত্র", "startWeek": 3, "weekNumber": 3, "title": "সরলরেখা", "deadline": "2026-12-14" },
+        { "id": "hm_4", "paper": "১ম পত্র", "startWeek": 4, "weekNumber": 4, "title": "বৃত্ত", "deadline": "2026-12-21" },
+        { "id": "hm_5", "paper": "১ম পত্র", "startWeek": 5, "weekNumber": 5, "title": "বিন্যাস ও সমাবেশ", "deadline": "2026-12-28" },
+        { "id": "hm_6", "paper": "১ম পত্র", "startWeek": 6, "weekNumber": 6, "title": "ত্রিকোণমিতিক অনুপাত", "deadline": "2027-01-04" },
+        { "id": "hm_7", "paper": "১ম পত্র", "startWeek": 7, "weekNumber": 7, "title": "সংযুক্ত কোণের ত্রিকোণমিতিক অনুপাত", "deadline": "2027-01-11" },
+        { "id": "hm_8", "paper": "১ম পত্র", "startWeek": 8, "weekNumber": 8, "title": "ফাংশন ও ফাংশনের লেখচিত্র", "deadline": "2027-01-18" },
+        { "id": "hm_9", "paper": "১ম পত্র", "startWeek": 9, "weekNumber": 9, "title": "অন্তরীকরণ", "deadline": "2027-01-25" },
+        { "id": "hm_10", "paper": "১ম পত্র", "startWeek": 10, "weekNumber": 10, "title": "যোগজীকরণ", "deadline": "2027-02-01" },
+        { "id": "hm_11", "paper": "২য় পত্র", "startWeek": 11, "weekNumber": 11, "title": "বাস্তব সংখ্যা ও অসমতা", "deadline": "2027-02-08" },
+        { "id": "hm_12", "paper": "২য় পত্র", "startWeek": 12, "weekNumber": 12, "title": "যোগাশ্রয়ী প্রোগ্রাম", "deadline": "2027-02-15" },
+        { "id": "hm_13", "paper": "২য় পত্র", "startWeek": 13, "weekNumber": 13, "title": "জটিল সংখ্যা", "deadline": "2027-02-22" },
+        { "id": "hm_14", "paper": "২য় পত্র", "startWeek": 14, "weekNumber": 14, "title": "বহুপদী ও বহুপদী সমীকরণ", "deadline": "2027-03-01" },
+        { "id": "hm_15", "paper": "২য় পত্র", "startWeek": 15, "weekNumber": 15, "title": "দ্বিপদী বিস্তৃতি", "deadline": "2027-03-08" },
+        { "id": "hm_16", "paper": "২য় পত্র", "startWeek": 16, "weekNumber": 16, "title": "কণিক", "deadline": "2027-03-15" },
+        { "id": "hm_17", "paper": "২য় পত্র", "startWeek": 17, "weekNumber": 17, "title": "বিপরীত ত্রিকোণমিতিক ফাংশন ও ত্রিকোণমিতিক সমীকরণ", "deadline": "2027-03-22" },
+        { "id": "hm_18", "paper": "২য় পত্র", "startWeek": 18, "weekNumber": 18, "title": "স্থিতিবিদ্যা", "deadline": "2027-03-29" },
+        { "id": "hm_19", "paper": "২য় পত্র", "startWeek": 19, "weekNumber": 19, "title": "সমতলে বস্তুকণার গতি", "deadline": "2027-04-05" },
+        { "id": "hm_20", "paper": "২য় পত্র", "startWeek": 20, "weekNumber": 20, "title": "বিস্তার পরিমাপ ও সম্ভাবনা", "deadline": "2027-04-12" },
+        { "id": "hm_21", "paper": "রিভিশন", "startWeek": 21, "weekNumber": 21, "title": "১ম পত্র রিভিশন", "deadline": "2027-04-19" },
+        { "id": "hm_22", "paper": "রিভিশন", "startWeek": 22, "weekNumber": 22, "title": "২য় পত্র রিভিশন", "deadline": "2027-04-26" },
+        { "id": "hm_23", "paper": "রিভিশন", "startWeek": 23, "weekNumber": 23, "title": "পূর্ণাঙ্গ পরীক্ষা", "deadline": "2027-05-03" },
+        { "id": "hm_24", "paper": "রিভিশন", "startWeek": 24, "weekNumber": 24, "title": "দুর্বল অধ্যায়", "deadline": "2027-05-10" },
+        { "id": "hm_25", "paper": "রিভিশন", "startWeek": 25, "weekNumber": 25, "title": "পূর্ণাঙ্গ অঙ্ক অনুশীলন", "deadline": "2027-05-17" },
+        { "id": "hm_26", "paper": "রিভিশন", "startWeek": 26, "weekNumber": 26, "title": "ফাইনাল মডেল টেস্ট", "deadline": "2027-05-23" }
+      ]
+    },
+    {
+      "id": "biology",
+      "group": "biology",
+      "nameBn": "জীববিজ্ঞান",
+      "nameEn": "Biology",
+      "chapterCountLabel": "২৪ অধ্যায়",
+      "noteBn": "সংজ্ঞা, বৈশিষ্ট্য, পার্থক্য, চিত্র ও প্রক্রিয়া বুঝে পড়তে এবং চিত্র আঁকার অনুশীলন করতে হবে।",
+      "chapters": [
+        { "id": "bio_1", "paper": "১ম পত্র (উদ্ভিদবিজ্ঞান)", "startWeek": 1, "weekNumber": 1, "title": "কোষ ও এর গঠন", "deadline": "2026-11-30" },
+        { "id": "bio_2", "paper": "১ম পত্র (উদ্ভিদবিজ্ঞান)", "startWeek": 2, "weekNumber": 2, "title": "কোষ বিভাজন", "deadline": "2026-12-07" },
+        { "id": "bio_3", "paper": "১ম পত্র (উদ্ভিদবিজ্ঞান)", "startWeek": 3, "weekNumber": 3, "title": "কোষ রসায়ন", "deadline": "2026-12-14" },
+        { "id": "bio_4", "paper": "১ম পত্র (উদ্ভিদবিজ্ঞান)", "startWeek": 4, "weekNumber": 4, "title": "অণুজীব", "deadline": "2026-12-21" },
+        { "id": "bio_5", "paper": "১ম পত্র (উদ্ভিদবিজ্ঞান)", "startWeek": 5, "weekNumber": 5, "title": "শৈবাল ও ছত্রাক", "deadline": "2026-12-28" },
+        { "id": "bio_6", "paper": "১ম পত্র (উদ্ভিদবিজ্ঞান)", "startWeek": 6, "weekNumber": 6, "title": "ব্রায়োফাইটা ও টেরিডোফাইটা", "deadline": "2027-01-04" },
+        { "id": "bio_7", "paper": "১ম পত্র (উদ্ভিদবিজ্ঞান)", "startWeek": 7, "weekNumber": 7, "title": "নগ্নবীজী ও আবৃতবীজী উদ্ভিদ", "deadline": "2027-01-11" },
+        { "id": "bio_8", "paper": "১ম পত্র (উদ্ভিদবিজ্ঞান)", "startWeek": 8, "weekNumber": 8, "title": "টিস্যু ও টিস্যুতন্ত্র", "deadline": "2027-01-18" },
+        { "id": "bio_9", "paper": "১ম পত্র (উদ্ভিদবিজ্ঞান)", "startWeek": 9, "weekNumber": 9, "title": "উদ্ভিদ শারীরতত্ত্ব", "deadline": "2027-01-25" },
+        { "id": "bio_10", "paper": "১ম পত্র (উদ্ভিদবিজ্ঞান)", "startWeek": 10, "weekNumber": 10, "title": "উদ্ভিদ প্রজনন", "deadline": "2027-02-01" },
+        { "id": "bio_11", "paper": "১ম পত্র (উদ্ভিদবিজ্ঞান)", "startWeek": 11, "weekNumber": 11, "title": "জীবপ্রযুক্তি", "deadline": "2027-02-08" },
+        { "id": "bio_12", "paper": "১ম পত্র (উদ্ভিদবিজ্ঞান)", "startWeek": 12, "weekNumber": 12, "title": "জীবের পরিবেশ, বিস্তার ও সংরক্ষণ", "deadline": "2027-02-15" },
+        { "id": "bio_13", "paper": "২য় পত্র (প্রাণীবিজ্ঞান)", "startWeek": 13, "weekNumber": 13, "title": "প্রাণীর বিভিন্নতা ও শ্রেণিবিন্যাস", "deadline": "2027-02-22" },
+        { "id": "bio_14", "paper": "২য় পত্র (প্রাণীবিজ্ঞান)", "startWeek": 14, "weekNumber": 14, "title": "প্রাণীর পরিচিতি", "deadline": "2027-03-01" },
+        { "id": "bio_15", "paper": "২য় পত্র (প্রাণীবিজ্ঞান)", "startWeek": 15, "weekNumber": 15, "title": "পরিপাক ও শোষণ", "deadline": "2027-03-08" },
+        { "id": "bio_16", "paper": "২য় পত্র (প্রাণীবিজ্ঞান)", "startWeek": 16, "weekNumber": 16, "title": "রক্ত ও সঞ্চালন", "deadline": "2027-03-15" },
+        { "id": "bio_17", "paper": "২য় পত্র (প্রাণীবিজ্ঞান)", "startWeek": 17, "weekNumber": 17, "title": "শ্বাসক্রিয়া ও শ্বসন", "deadline": "2027-03-22" },
+        { "id": "bio_18", "paper": "২য় পত্র (প্রাণীবিজ্ঞান)", "startWeek": 18, "weekNumber": 18, "title": "বর্জ্য ও নিষ্কাশন", "deadline": "2027-03-29" },
+        { "id": "bio_19", "paper": "২য় পত্র (প্রাণীবিজ্ঞান)", "startWeek": 19, "weekNumber": 19, "title": "চলন ও অঙ্গচালনা", "deadline": "2027-04-05" },
+        { "id": "bio_20", "paper": "২য় পত্র (প্রাণীবিজ্ঞান)", "startWeek": 20, "weekNumber": 20, "title": "সমন্বয় ও নিয়ন্ত্রণ", "deadline": "2027-04-12" },
+        { "id": "bio_21", "paper": "২য় পত্র (প্রাণীবিজ্ঞান)", "startWeek": 21, "weekNumber": 21, "title": "মানব জীবনের ধারাবাহিকতা", "deadline": "2027-04-19" },
+        { "id": "bio_22", "paper": "২য় পত্র (প্রাণীবিজ্ঞান)", "startWeek": 22, "weekNumber": 22, "title": "প্রতিরক্ষা ও রোগ", "deadline": "2027-04-26" },
+        { "id": "bio_23", "paper": "২য় পত্র (প্রাণীবিজ্ঞান)", "startWeek": 23, "weekNumber": 23, "title": "জিনতত্ত্ব ও বিবর্তন", "deadline": "2027-05-03" },
+        { "id": "bio_24", "paper": "২য় পত্র (প্রাণীবিজ্ঞান)", "startWeek": 24, "weekNumber": 24, "title": "প্রাণীর আচরণ", "deadline": "2027-05-10" },
+        { "id": "bio_25", "paper": "রিভিশন", "startWeek": 25, "weekNumber": 25, "title": "দুই পত্রের গুরুত্বপূর্ণ অধ্যায় রিভিশন", "deadline": "2027-05-17" },
+        { "id": "bio_26", "paper": "রিভিশন", "startWeek": 26, "weekNumber": 26, "title": "MCQ, সৃজনশীল ও ফাইনাল টেস্ট", "deadline": "2027-05-23" }
+      ]
+    },
+    {
+      "id": "chemistry",
+      "group": "chemistry",
+      "nameBn": "রসায়ন",
+      "nameEn": "Chemistry",
+      "chapterCountLabel": "১০ অধ্যায়",
+      "noteBn": "১ম পত্র ৫ অধ্যায় + ২য় পত্র ৫ অধ্যায় + অনুশীলন ও রিভিশন।",
+      "chapters": [
+        { "id": "chem_1", "paper": "১ম পত্র", "startWeek": 1, "weekNumber": 1, "title": "ল্যাবরেটরির নিরাপদ ব্যবহার", "deadline": "2026-11-30" },
+        { "id": "chem_2", "paper": "১ম পত্র", "startWeek": 2, "weekNumber": 2, "title": "১ম অধ্যায় অনুশীলন ও রিভিশন", "deadline": "2026-12-07" },
+        { "id": "chem_3", "paper": "১ম পত্র", "startWeek": 3, "weekNumber": 3, "title": "গুণগত রসায়ন", "deadline": "2026-12-14" },
+        { "id": "chem_4", "paper": "১ম পত্র", "startWeek": 4, "weekNumber": 4, "title": "২য় অধ্যায় অনুশীলন ও রিভিশন", "deadline": "2026-12-21" },
+        { "id": "chem_5", "paper": "১ম পত্র", "startWeek": 5, "weekNumber": 5, "title": "মৌলের পর্যায়বৃত্ত ধর্ম ও রাসায়নিক বন্ধন", "deadline": "2026-12-28" },
+        { "id": "chem_6", "paper": "১ম পত্র", "startWeek": 6, "weekNumber": 6, "title": "৩য় অধ্যায় অনুশীলন ও রিভিশন", "deadline": "2027-01-04" },
+        { "id": "chem_7", "paper": "১ম পত্র", "startWeek": 7, "weekNumber": 7, "title": "রাসায়নিক পরিবর্তন", "deadline": "2027-01-11" },
+        { "id": "chem_8", "paper": "১ম পত্র", "startWeek": 8, "weekNumber": 8, "title": "৪র্থ অধ্যায় অনুশীলন ও রিভিশন", "deadline": "2027-01-18" },
+        { "id": "chem_9", "paper": "১ম পত্র", "startWeek": 9, "weekNumber": 9, "title": "কর্মমুখী রসায়ন", "deadline": "2027-01-25" },
+        { "id": "chem_10", "paper": "১ম পত্র", "startWeek": 10, "weekNumber": 10, "title": "১ম পত্রের পূর্ণ রিভিশন", "deadline": "2027-02-01" },
+        { "id": "chem_11", "paper": "২য় পত্র", "startWeek": 11, "weekNumber": 11, "title": "পরিবেশ রসায়ন", "deadline": "2027-02-08" },
+        { "id": "chem_12", "paper": "২য় পত্র", "startWeek": 12, "weekNumber": 12, "title": "১ম অধ্যায় অনুশীলন ও রিভিশন", "deadline": "2027-02-15" },
+        { "id": "chem_13", "paper": "২য় পত্র", "startWeek": 13, "weekNumber": 13, "title": "জৈব রসায়ন", "deadline": "2027-02-22" },
+        { "id": "chem_14", "paper": "২য় পত্র", "startWeek": 14, "weekNumber": 14, "title": "২য় অধ্যায় অনুশীলন ও রিভিশন", "deadline": "2027-03-01" },
+        { "id": "chem_15", "paper": "২য় পত্র", "startWeek": 15, "weekNumber": 15, "title": "পরিমাণগত রসায়ন", "deadline": "2027-03-08" },
+        { "id": "chem_16", "paper": "২য় পত্র", "startWeek": 16, "weekNumber": 16, "title": "৩য় অধ্যায় অনুশীলন ও রিভিশন", "deadline": "2027-03-15" },
+        { "id": "chem_17", "paper": "২য় পত্র", "startWeek": 17, "weekNumber": 17, "title": "তড়িৎ রসায়ন", "deadline": "2027-03-22" },
+        { "id": "chem_18", "paper": "২য় পত্র", "startWeek": 18, "weekNumber": 18, "title": "৪র্থ অধ্যায় অনুশীলন ও রিভিশন", "deadline": "2027-03-29" },
+        { "id": "chem_19", "paper": "২য় পত্র", "startWeek": 19, "weekNumber": 19, "title": "অর্থনৈতিক রসায়ন", "deadline": "2027-04-05" },
+        { "id": "chem_20", "paper": "২য় পত্র", "startWeek": 20, "weekNumber": 20, "title": "২য় পত্রের পূর্ণ রিভিশন", "deadline": "2027-04-12" },
+        { "id": "chem_21", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 21, "weekNumber": 21, "title": "১ম পত্র রিভিশন", "deadline": "2027-04-19" },
+        { "id": "chem_22", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 22, "weekNumber": 22, "title": "২য় পত্র রিভিশন", "deadline": "2027-04-26" },
+        { "id": "chem_23", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 23, "weekNumber": 23, "title": "পূর্ণাঙ্গ পরীক্ষা", "deadline": "2027-05-03" },
+        { "id": "chem_24", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 24, "weekNumber": 24, "title": "দুর্বল অধ্যায় অনুশীলন", "deadline": "2027-05-10" },
+        { "id": "chem_25", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 25, "weekNumber": 25, "title": "MCQ ও লিখিত অনুশীলন", "deadline": "2027-05-17" },
+        { "id": "chem_26", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 26, "weekNumber": 26, "title": "ফাইনাল মডেল টেস্ট", "deadline": "2027-05-23" }
+      ]
+    },
+    {
+      "id": "bangla_1",
+      "group": "bangla",
+      "nameBn": "বাংলা ১ম পত্র",
+      "nameEn": "Bangla 1st Paper",
+      "chapterCountLabel": "১২ গদ্য, ১২ কবিতা, উপন্যাস, নাটক",
+      "noteBn": "লেখক/কবি পরিচিতি, মূলভাব, গুরুত্বপূর্ণ শব্দ, অনুধাবনমূলক, সৃজনশীল ও MCQ অনুশীলন।",
+      "chapters": [
+        { "id": "bn1_1", "paper": "গদ্য", "startWeek": 1, "weekNumber": 1, "title": "বাংলার নব লেখকদিগের প্রতি নিবেদন", "deadline": "2026-11-30" },
+        { "id": "bn1_2", "paper": "গদ্য", "startWeek": 2, "weekNumber": 2, "title": "অপরিচিতা", "deadline": "2026-12-07" },
+        { "id": "bn1_3", "paper": "গদ্য", "startWeek": 3, "weekNumber": 3, "title": "সাহিত্যে খেলা", "deadline": "2026-12-14" },
+        { "id": "bn1_4", "paper": "গদ্য", "startWeek": 4, "weekNumber": 4, "title": "বিলাসী", "deadline": "2026-12-21" },
+        { "id": "bn1_5", "paper": "গদ্য", "startWeek": 5, "weekNumber": 5, "title": "অর্ধাঙ্গী", "deadline": "2026-12-28" },
+        { "id": "bn1_6", "paper": "গদ্য", "startWeek": 6, "weekNumber": 6, "title": "যৌবনের গান", "deadline": "2027-01-04" },
+        { "id": "bn1_7", "paper": "গদ্য", "startWeek": 7, "weekNumber": 7, "title": "জীবন ও বৃক্ষ", "deadline": "2027-01-11" },
+        { "id": "bn1_8", "paper": "গদ্য", "startWeek": 8, "weekNumber": 8, "title": "গন্তব্য কাবুল", "deadline": "2027-01-18" },
+        { "id": "bn1_9", "paper": "গদ্য", "startWeek": 9, "weekNumber": 9, "title": "মাসি-পিসি", "deadline": "2027-01-25" },
+        { "id": "bn1_10", "paper": "গদ্য", "startWeek": 10, "weekNumber": 10, "title": "কপিলদাস মুর্মুর শেষ কাজ", "deadline": "2027-02-01" },
+        { "id": "bn1_11", "paper": "গদ্য", "startWeek": 11, "weekNumber": 11, "title": "নেকলেস", "deadline": "2027-02-08" },
+        { "id": "bn1_12", "paper": "গদ্য", "startWeek": 12, "weekNumber": 12, "title": "রেইনকোট", "deadline": "2027-02-15" },
+        { "id": "bn1_13", "paper": "কবিতা", "startWeek": 13, "weekNumber": 13, "title": "ঋতু বর্ণন", "deadline": "2027-02-22" },
+        { "id": "bn1_14", "paper": "কবিতা", "startWeek": 14, "weekNumber": 14, "title": "বিভীষণের প্রতি মেঘনাদ", "deadline": "2027-03-01" },
+        { "id": "bn1_15", "paper": "কবিতা", "startWeek": 15, "weekNumber": 15, "title": "সোনার তরী", "deadline": "2027-03-08" },
+        { "id": "bn1_16", "paper": "কবিতা", "startWeek": 16, "weekNumber": 16, "title": "বিদ্রোহী", "deadline": "2027-03-15" },
+        { "id": "bn1_17", "paper": "কবিতা", "startWeek": 17, "weekNumber": 17, "title": "সুচেতনা", "deadline": "2027-03-22" },
+        { "id": "bn1_18", "paper": "কবিতা", "startWeek": 18, "weekNumber": 18, "title": "প্রতিদান", "deadline": "2027-03-29" },
+        { "id": "bn1_19", "paper": "কবিতা", "startWeek": 19, "weekNumber": 19, "title": "তাহারেই পড়ে মনে", "deadline": "2027-04-05" },
+        { "id": "bn1_20", "paper": "কবিতা", "startWeek": 20, "weekNumber": 20, "title": "পদ্মা", "deadline": "2027-04-12" },
+        { "id": "bn1_21", "paper": "কবিতা", "startWeek": 21, "weekNumber": 21, "title": "আঠারো বছর বয়স", "deadline": "2027-04-19" },
+        { "id": "bn1_22", "paper": "কবিতা", "startWeek": 22, "weekNumber": 22, "title": "ফেব্রুয়ারি ১৯৬৯", "deadline": "2027-04-26" },
+        { "id": "bn1_23", "paper": "কবিতা", "startWeek": 23, "weekNumber": 23, "title": "আমি কিংবদন্তির কথা বলছি", "deadline": "2027-05-03" },
+        { "id": "bn1_24", "paper": "কবিতা", "startWeek": 24, "weekNumber": 24, "title": "প্রত্যাবর্তনের লজ্জা", "deadline": "2027-05-10" },
+        { "id": "bn1_25", "paper": "সহপাঠ", "startWeek": 25, "weekNumber": 25, "title": "উপন্যাস: লালসালু — সৈয়দ ওয়ালীউল্লাহ", "deadline": "2027-05-17" },
+        { "id": "bn1_26", "paper": "সহপাঠ", "startWeek": 26, "weekNumber": 26, "title": "নাটক: সিরাজ-উদ-দৌলা — সিকান্দার আবু জাফর", "deadline": "2027-05-23" }
+      ]
+    },
+    {
+      "id": "bangla_2",
+      "group": "bangla",
+      "nameBn": "বাংলা ২য় পত্র",
+      "nameEn": "Bangla 2nd Paper",
+      "chapterCountLabel": "ব্যাকরণ ও নির্মিতি",
+      "noteBn": "কলেজের নির্ধারিত প্রশ্নকাঠামো ও নির্দেশনা অনুসরণ করতে হবে।",
+      "chapters": [
+        { "id": "bn2_1", "paper": "ব্যাকরণ", "startWeek": 1, "weekNumber": 1, "title": "ধ্বনি ও বর্ণ", "deadline": "2026-11-30" },
+        { "id": "bn2_2", "paper": "ব্যাকরণ", "startWeek": 2, "weekNumber": 2, "title": "শব্দ ও পদ", "deadline": "2026-12-07" },
+        { "id": "bn2_3", "paper": "ব্যাকরণ", "startWeek": 3, "weekNumber": 3, "title": "বাক্য", "deadline": "2026-12-14" },
+        { "id": "bn2_4", "paper": "ব্যাকরণ", "startWeek": 4, "weekNumber": 4, "title": "শুদ্ধি ও অশুদ্ধি", "deadline": "2026-12-21" },
+        { "id": "bn2_5", "paper": "ব্যাকরণ", "startWeek": 5, "weekNumber": 5, "title": "উপসর্গ", "deadline": "2026-12-28" },
+        { "id": "bn2_6", "paper": "ব্যাকরণ", "startWeek": 6, "weekNumber": 6, "title": "প্রত্যয়", "deadline": "2027-01-04" },
+        { "id": "bn2_7", "paper": "ব্যাকরণ", "startWeek": 7, "weekNumber": 7, "title": "সমাস", "deadline": "2027-01-11" },
+        { "id": "bn2_8", "paper": "নির্মিতি", "startWeek": 8, "weekNumber": 8, "title": "পারিভাষিক শব্দ ও অনুবাদ", "deadline": "2027-01-18" },
+        { "id": "bn2_9", "paper": "নির্মিতি", "startWeek": 9, "weekNumber": 9, "title": "সারাংশ", "deadline": "2027-01-25" },
+        { "id": "bn2_10", "paper": "নির্মিতি", "startWeek": 10, "weekNumber": 10, "title": "সারমর্ম", "deadline": "2027-02-01" },
+        { "id": "bn2_11", "paper": "নির্মিতি", "startWeek": 11, "weekNumber": 11, "title": "ভাবসম্প্রসারণ", "deadline": "2027-02-08" },
+        { "id": "bn2_12", "paper": "নির্মিতি", "startWeek": 12, "weekNumber": 12, "title": "ভাবসম্প্রসারণ অনুশীলন", "deadline": "2027-02-15" },
+        { "id": "bn2_13", "paper": "নির্মিতি", "startWeek": 13, "weekNumber": 13, "title": "প্রতিবেদন", "deadline": "2027-02-22" },
+        { "id": "bn2_14", "paper": "নির্মিতি", "startWeek": 14, "weekNumber": 14, "title": "প্রতিবেদন অনুশীলন", "deadline": "2027-03-01" },
+        { "id": "bn2_15", "paper": "নির্মিতি", "startWeek": 15, "weekNumber": 15, "title": "প্রবন্ধ ও রচনা", "deadline": "2027-03-08" },
+        { "id": "bn2_16", "paper": "নির্মিতি", "startWeek": 16, "weekNumber": 16, "title": "প্রবন্ধ ও রচনা অনুশীলন", "deadline": "2027-03-15" },
+        { "id": "bn2_17", "paper": "রিভিশন", "startWeek": 17, "weekNumber": 20, "title": "সব ব্যাকরণ ও নির্মিতি পুনরায় অনুশীলন (সপ্তাহ ১৭–২০)", "deadline": "2027-04-12" },
+        { "id": "bn2_18", "paper": "রিভিশন", "startWeek": 21, "weekNumber": 26, "title": "বিগত প্রশ্ন, মডেল টেস্ট ও দুর্বল অংশের রিভিশন (সপ্তাহ ২১–২৬)", "deadline": "2027-05-23" }
+      ]
+    },
+    {
+      "id": "english_1",
+      "group": "english",
+      "nameBn": "ইংরেজি ১ম পত্র",
+      "nameEn": "English 1st Paper",
+      "chapterCountLabel": "English For Today",
+      "noteBn": "ইউনিটের নাম কলেজের বইয়ের সূচিপত্র থেকে সেটিংসে গিয়ে এডিট করে পূরণ করুন।",
+      "chapters": [
+        { "id": "en1_1", "paper": "English For Today", "startWeek": 1, "weekNumber": 6, "title": "বইয়ের প্রথম অংশের ইউনিট ও পাঠ (সপ্তাহ ১–৬ — ইউনিট নাম এডিট করুন)", "deadline": "2027-01-04", "isEditablePlaceholder": true },
+        { "id": "en1_2", "paper": "English For Today", "startWeek": 7, "weekNumber": 12, "title": "পরবর্তী ইউনিট ও পাঠ (সপ্তাহ ৭–১২ — ইউনিট নাম এডিট করুন)", "deadline": "2027-02-15", "isEditablePlaceholder": true },
+        { "id": "en1_3", "paper": "English For Today", "startWeek": 13, "weekNumber": 18, "title": "পরবর্তী ইউনিট ও পাঠ (সপ্তাহ ১৩–১৮ — ইউনিট নাম এডিট করুন)", "deadline": "2027-03-29", "isEditablePlaceholder": true },
+        { "id": "en1_4", "paper": "English For Today", "startWeek": 19, "weekNumber": 22, "title": "বাকি ইউনিট ও পাঠ (সপ্তাহ ১৯–২২ — ইউনিট নাম এডিট করুন)", "deadline": "2027-04-26", "isEditablePlaceholder": true },
+        { "id": "en1_5", "paper": "অনুশীলন", "startWeek": 23, "weekNumber": 24, "title": "Summary ও Flow-chart অনুশীলন (সপ্তাহ ২৩–২৪)", "deadline": "2027-05-10", "isEditablePlaceholder": false },
+        { "id": "en1_6", "paper": "অনুশীলন", "startWeek": 25, "weekNumber": 25, "title": "পূর্ণাঙ্গ অনুশীলন", "deadline": "2027-05-17", "isEditablePlaceholder": false },
+        { "id": "en1_7", "paper": "পরীক্ষা", "startWeek": 26, "weekNumber": 26, "title": "মডেল টেস্ট", "deadline": "2027-05-23", "isEditablePlaceholder": false }
+      ]
+    },
+    {
+      "id": "english_2",
+      "group": "english",
+      "nameBn": "ইংরেজি ২য় পত্র",
+      "nameEn": "English 2nd Paper",
+      "chapterCountLabel": "Grammar & Writing",
+      "noteBn": "PDF-এ ইংরেজি অংশের ফন্ট না থাকায় কলেজের সিলেবাস অনুযায়ী টপিক নামগুলো এডিট করে নিন।",
+      "chapters": [
+        { "id": "en2_1", "paper": "Grammar & Writing", "startWeek": 1, "weekNumber": 2, "title": "নির্ধারিত গ্রামার টপিক ১ (সপ্তাহ ১–২ — এডিট করুন)", "deadline": "2026-12-07", "isEditablePlaceholder": true },
+        { "id": "en2_2", "paper": "Grammar & Writing", "startWeek": 3, "weekNumber": 4, "title": "নির্ধারিত গ্রামার টপিক ২ (সপ্তাহ ৩–৪ — এডিট করুন)", "deadline": "2026-12-21", "isEditablePlaceholder": true },
+        { "id": "en2_3", "paper": "Grammar & Writing", "startWeek": 5, "weekNumber": 6, "title": "নির্ধারিত গ্রামার টপিক ৩ (সপ্তাহ ৫–৬ — এডিট করুন)", "deadline": "2027-01-04", "isEditablePlaceholder": true },
+        { "id": "en2_4", "paper": "Grammar & Writing", "startWeek": 7, "weekNumber": 8, "title": "নির্ধারিত গ্রামার টপিক ৪ (সপ্তাহ ৭–৮ — এডিট করুন)", "deadline": "2027-01-18", "isEditablePlaceholder": true },
+        { "id": "en2_5", "paper": "Grammar & Writing", "startWeek": 9, "weekNumber": 10, "title": "নির্ধারিত গ্রামার টপিক ৫ (সপ্তাহ ৯–১০ — এডিট করুন)", "deadline": "2027-02-01", "isEditablePlaceholder": true },
+        { "id": "en2_6", "paper": "Grammar & Writing", "startWeek": 11, "weekNumber": 12, "title": "নির্ধারিত গ্রামার টপিক ৬ (সপ্তাহ ১১–১২ — এডিট করুন)", "deadline": "2027-02-15", "isEditablePlaceholder": true },
+        { "id": "en2_7", "paper": "Grammar & Writing", "startWeek": 13, "weekNumber": 14, "title": "নির্ধারিত গ্রামার টপিক ৭ (সপ্তাহ ১৩–১৪ — এডিট করুন)", "deadline": "2027-03-01", "isEditablePlaceholder": true },
+        { "id": "en2_8", "paper": "Grammar & Writing", "startWeek": 15, "weekNumber": 16, "title": "নির্ধারিত গ্রামার টপিক ৮ (সপ্তাহ ১৫–১৬ — এডিট করুন)", "deadline": "2027-03-15", "isEditablePlaceholder": true },
+        { "id": "en2_9", "paper": "Grammar & Writing", "startWeek": 17, "weekNumber": 18, "title": "নির্ধারিত গ্রামার টপিক ৯ (সপ্তাহ ১৭–১৮ — এডিট করুন)", "deadline": "2027-03-29", "isEditablePlaceholder": true },
+        { "id": "en2_10", "paper": "Grammar & Writing", "startWeek": 19, "weekNumber": 20, "title": "নির্ধারিত গ্রামার টপিক ১০ (সপ্তাহ ১৯–২০ — এডিট করুন)", "deadline": "2027-04-12", "isEditablePlaceholder": true },
+        { "id": "en2_11", "paper": "Composition", "startWeek": 21, "weekNumber": 21, "title": "নির্ধারিত রাইটিং টপিক ১ (সপ্তাহ ২১ — এডিট করুন)", "deadline": "2027-04-19", "isEditablePlaceholder": true },
+        { "id": "en2_12", "paper": "Composition", "startWeek": 22, "weekNumber": 22, "title": "নির্ধারিত রাইটিং টপিক ২ (সপ্তাহ ২২ — এডিট করুন)", "deadline": "2027-04-26", "isEditablePlaceholder": true },
+        { "id": "en2_13", "paper": "Composition", "startWeek": 23, "weekNumber": 23, "title": "নির্ধারিত রাইটিং টপিক ৩ (সপ্তাহ ২৩ — এডিট করুন)", "deadline": "2027-05-03", "isEditablePlaceholder": true },
+        { "id": "en2_14", "paper": "Composition", "startWeek": 24, "weekNumber": 24, "title": "নির্ধারিত রাইটিং টপিক ৪ (সপ্তাহ ২৪ — এডিট করুন)", "deadline": "2027-05-10", "isEditablePlaceholder": true },
+        { "id": "en2_15", "paper": "রিভিশন", "startWeek": 25, "weekNumber": 25, "title": "সম্পূর্ণ Grammar ও Writing অনুশীলন (সপ্তাহ ২৫)", "deadline": "2027-05-17", "isEditablePlaceholder": true },
+        { "id": "en2_16", "paper": "পরীক্ষা", "startWeek": 26, "weekNumber": 26, "title": "বোর্ড প্রশ্ন ও পূর্ণাঙ্গ মডেল টেস্ট (সপ্তাহ ২৬)", "deadline": "2027-05-23", "isEditablePlaceholder": true }
+      ]
+    },
+    {
+      "id": "ict",
+      "group": "ict",
+      "nameBn": "ICT",
+      "nameEn": "ICT",
+      "chapterCountLabel": "৬ অধ্যায়",
+      "noteBn": "মূল ধারণা, সংজ্ঞা, MCQ, চিত্র ও টেবিল এবং ব্যবহারিক অংশ হাতে-কলমে অনুশীলন করতে হবে।",
+      "chapters": [
+        { "id": "ict_1", "paper": "ICT", "startWeek": 1, "weekNumber": 2, "title": "তথ্য ও যোগাযোগ প্রযুক্তি: বিশ্ব ও বাংলাদেশ প্রেক্ষিত", "deadline": "2026-12-07" },
+        { "id": "ict_2", "paper": "ICT", "startWeek": 3, "weekNumber": 6, "title": "কমিউনিকেশন সিস্টেমস ও নেটওয়ার্কিং", "deadline": "2027-01-04" },
+        { "id": "ict_3", "paper": "ICT", "startWeek": 7, "weekNumber": 10, "title": "সংখ্যা পদ্ধতি ও ডিজিটাল ডিভাইস", "deadline": "2027-02-01" },
+        { "id": "ict_4", "paper": "ICT", "startWeek": 11, "weekNumber": 14, "title": "ওয়েব ডিজাইন পরিচিতি ও HTML", "deadline": "2027-03-01" },
+        { "id": "ict_5", "paper": "ICT", "startWeek": 15, "weekNumber": 18, "title": "প্রোগ্রামিং ভাষা", "deadline": "2027-03-29" },
+        { "id": "ict_6", "paper": "ICT", "startWeek": 19, "weekNumber": 22, "title": "ডেটাবেজ ম্যানেজমেন্ট সিস্টেম", "deadline": "2027-04-26" },
+        { "id": "ict_7", "paper": "রিভিশন ও পরীক্ষা", "startWeek": 23, "weekNumber": 26, "title": "সম্পূর্ণ ICT রিভিশন ও পরীক্ষা", "deadline": "2027-05-23" }
+      ]
+    }
+  ]
+}
+;
+
+</script>
+  <script>
+(function () {
+  'use strict';
+
+  const STORAGE_KEY = 'hsc_2028_study_state_v1';
+  const PLAN_START = '2026-11-24';
+  const PLAN_END = '2027-05-23';
+  const TOTAL_WEEKS = 26;
+
+  const STATUS_LIST = [
+    { id: 'NOT_STARTED', bn: 'শুরু হয়নি', en: 'Not started' },
+    { id: 'IN_PROGRESS', bn: 'চলছে', en: 'In progress' },
+    { id: 'FIRST_READING_DONE', bn: 'প্রথমবার পড়া শেষ', en: 'First reading done' },
+    { id: 'PRACTICE_DONE', bn: 'অনুশীলন শেষ', en: 'Practice done' },
+    { id: 'REVISION_DONE', bn: 'রিভিশন শেষ', en: 'Revision done' },
+    { id: 'EXAM_TAKEN', bn: 'পরীক্ষা দেওয়া হয়েছে', en: 'Exam taken' }
+  ];
+
+  const BN_DIGITS = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  function toBnDigits(val) {
+    return String(val).replace(/[0-9]/g, (d) => BN_DIGITS[Number(d)]);
+  }
+
+  function todayIso() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function parseIsoLocal(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d, 0, 0, 0, 0);
+  }
+
+  function daysBetween(fromIso, toIso) {
+    const a = parseIsoLocal(fromIso).getTime();
+    const b = parseIsoLocal(toIso).getTime();
+    return Math.round((b - a) / 86400000);
+  }
+
+  function currentWeekNumber(tIso = todayIso()) {
+    const diff = daysBetween(PLAN_START, tIso);
+    if (diff < 0) return 1;
+    return Math.min(TOTAL_WEEKS, Math.max(1, Math.floor(diff / 7) + 1));
+  }
+
+  function weekStartIso(w) {
+    const d = parseIsoLocal(PLAN_START);
+    d.setDate(d.getDate() + (w - 1) * 7);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  function weekDeadlineIso(w) {
+    if (w >= TOTAL_WEEKS) return PLAN_END;
+    const d = parseIsoLocal(PLAN_START);
+    d.setDate(d.getDate() + w * 7 - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  function dayRoutineKey(tIso = todayIso()) {
+    const day = parseIsoLocal(tIso).getDay();
+    return ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][day];
+  }
+
+  function formatDate(iso, lang) {
+    const d = parseIsoLocal(iso);
+    if (lang === 'en') {
+      return d.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    const days = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+    const months = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+    return `${days[d.getDay()]}, ${toBnDigits(d.getDate())} ${months[d.getMonth()]} ${toBnDigits(d.getFullYear())}`;
+  }
+
+  function formatShortDate(iso, lang) {
+    const d = parseIsoLocal(iso);
+    if (lang === 'en') {
+      return d.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    const months = ['জানু', 'ফেব্রু', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টে', 'অক্টো', 'নভে', 'ডিসে'];
+    return `${toBnDigits(d.getDate())} ${months[d.getMonth()]} ${toBnDigits(d.getFullYear())}`;
+  }
+
+  function phaseMinutes(dailyHours) {
+    return dailyHours <= 3 ? [30, 12, 3] : [50, 20, 5];
+  }
+
+  function isFinishedForRollover(statusId) {
+    return statusId === 'PRACTICE_DONE' || statusId === 'REVISION_DONE' || statusId === 'EXAM_TAKEN';
+  }
+
+  function el(tag, attrs = {}, children = []) {
+    const node = document.createElement(tag);
+    Object.entries(attrs).forEach(([k, v]) => {
+      if (k === 'className') node.className = v;
+      else if (k === 'text') node.textContent = v;
+      else if (k === 'style') node.setAttribute('style', v);
+      else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2).toLowerCase(), v);
+      else if (v !== undefined && v !== null && v !== false) node.setAttribute(k, v === true ? '' : v);
+    });
+    (Array.isArray(children) ? children : [children]).forEach((ch) => {
+      if (ch === null || ch === undefined) return;
+      if (typeof ch === 'string' || typeof ch === 'number') node.appendChild(document.createTextNode(String(ch)));
+      else node.appendChild(ch);
+    });
+    return node;
+  }
+
+  const PLAN = window.STUDY_PLAN;
+
+  function buildInitialState() {
+    const chapters = [];
+    PLAN.subjects.forEach((subj) => {
+      subj.chapters.forEach((ch) => {
+        chapters.push({
+          id: ch.id,
+          subjectId: subj.id,
+          subjectGroup: subj.group,
+          paper: ch.paper,
+          startWeek: ch.startWeek || 1,
+          weekNumber: ch.weekNumber,
+          title: ch.title,
+          deadline: ch.deadline,
+          status: 'NOT_STARTED',
+          isEditablePlaceholder: Boolean(ch.isEditablePlaceholder)
+        });
+      });
+    });
+    return {
+      version: 1,
+      settings: {
+        dailyHours: 5,
+        language: 'bn',
+        darkMode: true,
+        notificationsEnabled: false
+      },
+      chapters,
+      weeklyTasksCompleted: {},
+      fridayChecklistCompleted: {},
+      dailyCompletedSlots: {},
+      mistakes: []
+    };
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return buildInitialState();
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.chapters) || parsed.chapters.length === 0) {
+        return buildInitialState();
+      }
+      return parsed;
+    } catch {
+      return buildInitialState();
+    }
+  }
+
+  let appState = loadState();
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+  }
+
+  let currentScreen = 'today';
+  let roadmapSubject = 'ALL';
+  let roadmapFilter = 'ALL';
+  let roadmapQuery = '';
+  let weeklySelectedWeek = currentWeekNumber();
+  let mistakeFilter = 'ALL';
+  let mistakeSubjectFilter = 'ALL';
+  let settingsEditSubject = PLAN.subjects[0].id;
+
+  // Live session timers (slot 1..4)
+  const timers = {};
+  let breakTimer = { remaining: 0, running: false };
+
+  function ensureTimers() {
+    const [p1, p2, p3] = phaseMinutes(appState.settings.dailyHours);
+    const totalSec = (p1 + p2 + p3) * 60;
+    [1, 2, 3, 4].forEach((slot) => {
+      if (!timers[slot]) {
+        timers[slot] = { total: totalSec, remaining: totalSec, running: false };
+      } else {
+        timers[slot].total = totalSec;
+        if (timers[slot].remaining > totalSec || (!timers[slot].running && timers[slot].remaining === 0)) {
+          timers[slot].remaining = totalSec;
+        }
+      }
+    });
+  }
+
+  function notify(title, body) {
+    if (!appState.settings.notificationsEnabled || !('Notification' in window)) return;
+    if (Notification.permission === 'granted') {
+      try {
+        new Notification(title, { body });
+      } catch {}
+    }
+  }
+
+  setInterval(() => {
+    let completedAny = false;
+    const lang = appState.settings.language;
+    const [p1, p2, p3] = phaseMinutes(appState.settings.dailyHours);
+    const p1Sec = p1 * 60;
+    const p2Sec = p2 * 60;
+    const p3Sec = p3 * 60;
+
+    Object.entries(timers).forEach(([slot, t]) => {
+      if (t.running && t.remaining > 0) {
+        const beforeElapsed = t.total - t.remaining;
+        t.remaining -= 1;
+        const afterElapsed = t.total - t.remaining;
+        ticked = true;
+
+        if (beforeElapsed < p1Sec && afterElapsed >= p1Sec) {
+          notify(lang === 'bn' ? `সেশন ${toBnDigits(slot)}: অনুশীলন ধাপ` : `Session ${slot}: Practice Phase`,
+            lang === 'bn' ? 'অঙ্ক, MCQ বা সৃজনশীল অনুশীলন শুরু করুন।' : 'Start math, MCQ, or CQ practice.');
+        } else if (beforeElapsed < p1Sec + p2Sec && afterElapsed >= p1Sec + p2Sec) {
+          notify(lang === 'bn' ? `সেশন ${toBnDigits(slot)}: বই বন্ধ করে মনে করুন` : `Session ${slot}: Closed-book Recall`,
+            lang === 'bn' ? '৫ মিনিট বই বন্ধ করে নিজের ভাষায় মনে করুন।' : 'Close your book for 5 minutes of recall.');
+        }
+
+        if (t.remaining === 0) {
+          t.running = false;
+          completedAny = true;
+          const tIso = todayIso();
+          const done = new Set(appState.dailyCompletedSlots[tIso] || []);
+          done.add(Number(slot));
+          appState.dailyCompletedSlots[tIso] = Array.from(done);
+          saveState();
+          notify(lang === 'bn' ? `সেশন ${toBnDigits(slot)} সম্পন্ন!` : `Session ${slot} completed!`,
+            lang === 'bn' ? '১০–১৫ মিনিট বিরতি নিন।' : 'Take a 10–15 minute break.');
+        } else if (currentScreen === 'today') {
+          const readout = document.getElementById(`timer-readout-${slot}`);
+          const phaseEl = document.getElementById(`phase-label-${slot}`);
+          const f1 = document.getElementById(`p1-fill-${slot}`);
+          const f2 = document.getElementById(`p2-fill-${slot}`);
+          const f3 = document.getElementById(`p3-fill-${slot}`);
+          if (readout) readout.textContent = formatMmSs(t.remaining);
+          if (phaseEl) {
+            phaseEl.textContent = afterElapsed < p1Sec
+              ? (lang === 'bn' ? `ধাপ ১/৩ (${num(p1)} মি.): নতুন টপিক পড়া` : `Phase 1/3 (${p1}m): New topic`)
+              : afterElapsed < p1Sec + p2Sec
+              ? (lang === 'bn' ? `ধাপ ২/৩ (${num(p2)} মি.): অঙ্ক, MCQ বা সৃজনশীল` : `Phase 2/3 (${p2}m): Practice`)
+              : (lang === 'bn' ? `ধাপ ৩/৩ (${num(p3)} মি.): বই বন্ধ করে মনে করা` : `Phase 3/3 (${p3}m): Closed-book recall`);
+          }
+          if (f1) f1.style.width = `${Math.min(100, Math.max(0, (afterElapsed / p1Sec) * 100))}%`;
+          if (f2) f2.style.width = `${Math.min(100, Math.max(0, ((afterElapsed - p1Sec) / p2Sec) * 100))}%`;
+          if (f3) f3.style.width = `${Math.min(100, Math.max(0, ((afterElapsed - p1Sec - p2Sec) / p3Sec) * 100))}%`;
+        }
+      }
+    });
+
+    if (breakTimer.running && breakTimer.remaining > 0) {
+      breakTimer.remaining -= 1;
+      ticked = true;
+      if (breakTimer.remaining === 0) {
+        breakTimer.running = false;
+        completedAny = true;
+        notify(lang === 'bn' ? 'বিরতি শেষ!' : 'Break finished!',
+          lang === 'bn' ? 'পরের সেশন শুরু করুন।' : 'Start your next study session.');
+      } else if (currentScreen === 'today') {
+        const breakEl = document.getElementById('break-status-text');
+        if (breakEl) {
+          breakEl.textContent = lang === 'bn'
+            ? `বিরতি চলছে: ${formatMmSs(breakTimer.remaining)}`
+            : `Break: ${formatMmSs(breakTimer.remaining)}`;
+        }
+      }
+    }
+
+    if (completedAny && currentScreen === 'today') {
+      render();
+    }
+  }, 1000);
+
+  function t(bn, en) {
+    return appState.settings.language === 'bn' ? bn : en;
+  }
+
+  function num(n) {
+    return appState.settings.language === 'bn' ? toBnDigits(n) : String(n);
+  }
+
+  function formatMmSs(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    const raw = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    return appState.settings.language === 'bn' ? toBnDigits(raw) : raw;
+  }
+
+  function getChaptersWithRollover() {
+    const tIso = todayIso();
+    const curWeek = currentWeekNumber(tIso);
+    const subjMap = Object.fromEntries(PLAN.subjects.map((s) => [s.id, s]));
+
+    return appState.chapters.map((ch) => {
+      const subj = subjMap[ch.subjectId];
+      const overdue = !isFinishedForRollover(ch.status) && daysBetween(ch.deadline, tIso) > 0;
+      const effectiveWeek = overdue && curWeek > ch.weekNumber ? curWeek : ch.weekNumber;
+      const rolledOver = overdue && curWeek > ch.weekNumber;
+      const isCurrentWeek = curWeek >= ch.startWeek && curWeek <= effectiveWeek;
+      return {
+        ...ch,
+        subjectNameBn: subj ? subj.nameBn : ch.subjectId,
+        subjectNameEn: subj ? subj.nameEn : ch.subjectId,
+        isOverdue: overdue,
+        isRolledOver: rolledOver,
+        effectiveWeek,
+        isCurrentWeek
+      };
+    });
+  }
+
+  function computeWeekPercent(week, enrichedChapters) {
+    const totalTasks = PLAN.weeklyMandatoryTasks.length + PLAN.fridayExamChecklist.length;
+    const doneTasks = (appState.weeklyTasksCompleted[week] || []).length +
+      (appState.fridayChecklistCompleted[week] || []).length;
+    const weekCh = enrichedChapters.filter((c) => week >= c.startWeek && week <= c.effectiveWeek);
+    const doneCh = weekCh.filter((c) => isFinishedForRollover(c.status)).length;
+    const total = totalTasks + weekCh.length;
+    if (total === 0) return 0;
+    return Math.round(((doneTasks + doneCh) * 100) / total);
+  }
+
+  function openModal(contentNode) {
+    const card = document.getElementById('modalCard');
+    card.innerHTML = '';
+    card.appendChild(contentNode);
+    document.getElementById('modalBackdrop').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modalBackdrop').classList.remove('open');
+  }
+
+  document.getElementById('modalBackdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'modalBackdrop') closeModal();
+  });
+
+  function renderStatusSelect(ch, onChange) {
+    const sel = el('select', { style: 'width:auto;min-width:170px' });
+    STATUS_LIST.forEach((st) => {
+      const opt = el('option', { value: st.id, text: t(st.bn, st.en) });
+      if (st.id === ch.status) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('change', (e) => onChange(e.target.value));
+    return sel;
+  }
+
+  function openEditChapterModal(ch) {
+    let title = ch.title;
+    let week = ch.weekNumber;
+    let deadline = ch.deadline;
+
+    const titleIn = el('input', { type: 'text', value: title });
+    const weekIn = el('input', { type: 'number', min: 1, max: 26, value: week });
+    const dlIn = el('input', { type: 'date', value: deadline });
+
+    weekIn.addEventListener('input', () => {
+      const w = Math.min(26, Math.max(1, Number(weekIn.value) || 1));
+      dlIn.value = weekDeadlineIso(w);
+    });
+
+    const node = el('div', { className: 'stack' }, [
+      el('h3', { text: t('অধ্যায় ও ডেডলাইন এডিট', 'Edit Chapter & Deadline'), style: 'margin:0' }),
+      el('label', { text: t('অধ্যায় / ইউনিটের নাম', 'Chapter / Unit Title') }),
+      titleIn,
+      el('label', { text: t('সপ্তাহ (১–২৬)', 'Week (1–26)') }),
+      weekIn,
+      el('label', { text: t('ডেডলাইন', 'Deadline') }),
+      dlIn,
+      el('div', { className: 'row', style: 'justify-content:flex-end;margin-top:8px' }, [
+        el('button', { className: 'btn', text: t('বাতিল', 'Cancel'), onClick: closeModal }),
+        el('button', {
+          className: 'btn primary',
+          text: t('সংরক্ষণ', 'Save'),
+          onClick: () => {
+            appState.chapters = appState.chapters.map((item) =>
+              item.id === ch.id
+                ? {
+                    ...item,
+                    title: titleIn.value.trim() || item.title,
+                    weekNumber: Math.min(26, Math.max(1, Number(weekIn.value) || item.weekNumber)),
+                    deadline: dlIn.value || item.deadline,
+                    isEditablePlaceholder: false
+                  }
+                : item
+            );
+            saveState();
+            closeModal();
+            render();
+          }
+        })
+      ])
+    ]);
+    openModal(node);
+  }
+
+  function renderToday(enriched) {
+    ensureTimers();
+    const lang = appState.settings.language;
+    const tIso = todayIso();
+    const curWeek = currentWeekNumber(tIso);
+    const dayKey = dayRoutineKey(tIso);
+    const routine = PLAN.weeklyRoutine[dayKey] || [];
+    const doneSlots = new Set(appState.dailyCompletedSlots[tIso] || []);
+    const [p1, p2, p3] = phaseMinutes(appState.settings.dailyHours);
+    const rolloverCount = enriched.filter((c) => c.isRolledOver).length;
+    const pct = Math.round((doneSlots.size * 100) / Math.max(1, routine.length));
+
+    const heroCard = el('div', { className: 'card hero stack' }, [
+      el('div', { className: 'row-between' }, [
+        el('strong', { text: formatDate(tIso, lang) }),
+        el('span', { className: 'badge primary', text: t(`সপ্তাহ ${num(curWeek)}/২৬`, `Week ${curWeek}/26`) })
+      ]),
+      el('div', {
+        className: 'muted',
+        text: t(
+          `দৈনিক ${num(appState.settings.dailyHours)} ঘণ্টা • ${num(p1 + p2 + p3)} মি. × ৪ সেশন (${num(p1)}/${num(p2)}/${num(p3)})`,
+          `Daily ${appState.settings.dailyHours}h • ${p1 + p2 + p3} min × 4 sessions (${p1}/${p2}/${p3})`
+        )
+      }),
+      el('div', { className: 'row-between' }, [
+        el('span', { text: t('আজকের অগ্রগতি', 'Daily Progress') }),
+        el('strong', { text: `${num(doneSlots.size)}/${num(routine.length)} (${num(pct)}%)` })
+      ]),
+      el('div', { className: 'progress-track' }, [
+        el('div', { className: 'progress-fill', style: `width:${pct}%` })
+      ])
+    ]);
+
+    const breakCard = el('div', { className: 'card row-between' }, [
+      el('span', {
+        id: 'break-status-text',
+        text: breakTimer.running
+          ? t(`বিরতি চলছে: ${formatMmSs(breakTimer.remaining)}`, `Break: ${formatMmSs(breakTimer.remaining)}`)
+          : t('সেশনের মাঝে ১০–১৫ মি. বিরতি', '10–15 min break between sessions')
+      }),
+      breakTimer.running
+        ? el('button', {
+            className: 'btn small danger',
+            text: t('বন্ধ', 'Stop'),
+            onClick: () => {
+              breakTimer = { remaining: 0, running: false };
+              render();
+            }
+          })
+        : el('div', { className: 'row' }, [
+            el('button', {
+              className: 'btn small',
+              text: t('১০ মি.', '10m'),
+              onClick: () => {
+                breakTimer = { remaining: 600, running: true };
+                render();
+              }
+            }),
+            el('button', {
+              className: 'btn small',
+              text: t('১৫ মি.', '15m'),
+              onClick: () => {
+                breakTimer = { remaining: 900, running: true };
+                render();
+              }
+            })
+          ])
+    ]);
+
+    const sideCol = el('div', { className: 'stack' }, [heroCard]);
+    if (rolloverCount > 0) {
+      sideCol.appendChild(
+        el('div', { className: 'card overdue stack', style: 'cursor:pointer', onClick: () => { currentScreen = 'roadmap'; render(); } }, [
+          el('strong', { text: t(`স্মার্ট রোলওভার: ${num(rolloverCount)}টি অধ্যায় বকেয়া`, `Smart Rollover: ${rolloverCount} overdue`) }),
+          el('div', { className: 'muted', text: t('কঠিন অধ্যায় বাদ না দিয়ে এই সপ্তাহে শেষ করুন। রোডম্যাপ দেখুন →', 'Finish rolled-over chapters this week. Open Roadmap →') })
+        ])
+      );
+    }
+    sideCol.appendChild(breakCard);
+
+    const sessionCards = routine.map((slot) => {
+      const targetGroups = slot.group === 'chemistry_biology'
+        ? ['chemistry', 'biology']
+        : slot.group === 'bangla_english_ict'
+        ? ['bangla', 'english', 'ict']
+        : [slot.group];
+
+      const matches = enriched
+        .filter((c) => targetGroups.includes(c.subjectGroup) && curWeek >= c.startWeek && curWeek <= c.effectiveWeek)
+        .sort((a, b) => Number(b.isRolledOver) - Number(a.isRolledOver) || Number(isFinishedForRollover(a.status)) - Number(isFinishedForRollover(b.status)));
+
+      const activeCh = matches.find((c) => !isFinishedForRollover(c.status)) || matches[0];
+      const timer = timers[slot.slot];
+      const elapsed = timer.total - timer.remaining;
+      const p1Sec = p1 * 60;
+      const p2Sec = p2 * 60;
+      const p3Sec = p3 * 60;
+
+      const phaseLabel = elapsed < p1Sec
+        ? t(`ধাপ ১/৩ (${num(p1)} মি.): নতুন টপিক পড়া`, `Phase 1/3 (${p1}m): New topic`)
+        : elapsed < p1Sec + p2Sec
+        ? t(`ধাপ ২/৩ (${num(p2)} মি.): অঙ্ক, MCQ বা সৃজনশীল`, `Phase 2/3 (${p2}m): Practice`)
+        : t(`ধাপ ৩/৩ (${num(p3)} মি.): বই বন্ধ করে মনে করা`, `Phase 3/3 (${p3}m): Closed-book recall`);
+
+      const p1Fill = Math.min(100, Math.max(0, (elapsed / p1Sec) * 100));
+      const p2Fill = Math.min(100, Math.max(0, ((elapsed - p1Sec) / p2Sec) * 100));
+      const p3Fill = Math.min(100, Math.max(0, ((elapsed - p1Sec - p2Sec) / p3Sec) * 100));
+
+      const isDone = doneSlots.has(slot.slot);
+      const doneCb = el('input', { type: 'checkbox', checked: isDone });
+      doneCb.addEventListener('change', (e) => {
+        const set = new Set(appState.dailyCompletedSlots[tIso] || []);
+        if (e.target.checked) set.add(slot.slot);
+        else set.delete(slot.slot);
+        appState.dailyCompletedSlots[tIso] = Array.from(set);
+        saveState();
+        render();
+      });
+
+      const children = [
+        el('div', { className: 'row-between' }, [
+          el('div', { className: 'row' }, [
+            el('span', { className: 'badge primary', text: num(slot.slot) }),
+            el('strong', { text: lang === 'bn' ? slot.labelBn : slot.labelEn })
+          ]),
+          el('label', { className: 'row', style: 'cursor:pointer' }, [
+            el('span', { className: 'muted', text: t('সম্পন্ন', 'Done') }),
+            doneCb
+          ])
+        ])
+      ];
+
+      if (activeCh) {
+        children.push(
+          el('div', { className: `card stack ${activeCh.isOverdue ? 'overdue' : ''}`, style: 'padding:12px' }, [
+            el('div', { className: 'row-between' }, [
+              el('span', {
+                className: `badge ${activeCh.isOverdue ? 'error' : ''}`,
+                text: activeCh.isRolledOver
+                  ? t(`রোলওভার (সপ্তাহ ${num(activeCh.weekNumber)})`, `Rolled over (Wk ${activeCh.weekNumber})`)
+                  : activeCh.paper
+              }),
+              el('span', { className: 'muted', text: formatShortDate(activeCh.deadline, lang) })
+            ]),
+            el('strong', { text: activeCh.title }),
+            renderStatusSelect(activeCh, (val) => {
+              appState.chapters = appState.chapters.map((c) => (c.id === activeCh.id ? { ...c, status: val } : c));
+              saveState();
+              render();
+            })
+          ])
+        );
+      }
+
+      children.push(
+        el('div', { id: `phase-label-${slot.slot}`, className: 'muted', text: phaseLabel }),
+        el('div', { className: 'phase-bars' }, [
+          el('div', { className: 'progress-track' }, [el('div', { id: `p1-fill-${slot.slot}`, className: 'progress-fill', style: `width:${p1Fill}%` })]),
+          el('div', { className: 'progress-track' }, [el('div', { id: `p2-fill-${slot.slot}`, className: 'progress-fill', style: `width:${p2Fill}%;background:var(--secondary)` })]),
+          el('div', { className: 'progress-track' }, [el('div', { id: `p3-fill-${slot.slot}`, className: 'progress-fill', style: `width:${p3Fill}%;background:var(--tertiary)` })])
+        ]),
+        el('div', { className: 'row-between' }, [
+          el('div', { id: `timer-readout-${slot.slot}`, className: 'timer-readout', text: formatMmSs(timer.remaining) }),
+          el('div', { className: 'row' }, [
+            el('button', {
+              className: 'btn small',
+              text: t('রিসেট', 'Reset'),
+              onClick: () => {
+                timer.running = false;
+                timer.remaining = timer.total;
+                render();
+              }
+            }),
+            el('button', {
+              className: 'btn primary small',
+              text: timer.running ? t('বিরতি', 'Pause') : t('শুরু', 'Start'),
+              onClick: () => {
+                const next = !timer.running;
+                Object.values(timers).forEach((o) => { o.running = false; });
+                timer.running = next;
+                render();
+              }
+            })
+          ])
+        ])
+      );
+
+      return el('div', { className: `card stack ${timer.running ? 'running' : ''}` }, children);
+    });
+
+    return el('div', { className: 'desktop-split' }, [
+      el('div', { className: 'grid-2' }, sessionCards),
+      sideCol
+    ]);
+  }
+
+  function renderRoadmap(enriched) {
+    const lang = appState.settings.language;
+    const curWeek = currentWeekNumber();
+
+    const subjSidebar = el('div', { className: 'card stack' }, [
+      el('strong', { text: t('বিষয়সমূহ', 'Subjects') }),
+      el('button', {
+        className: `subject-item ${roadmapSubject === 'ALL' ? 'active' : ''}`,
+        onClick: () => { roadmapSubject = 'ALL'; render(); }
+      }, [
+        el('span', { text: t('সব বিষয়', 'All Subjects') }),
+        el('span', { className: 'muted', text: `${num(enriched.length)} ${t('অধ্যায়', 'chapters')}` })
+      ])
+    ]);
+
+    PLAN.subjects.forEach((subj) => {
+      const list = enriched.filter((c) => c.subjectId === subj.id);
+      const done = list.filter((c) => isFinishedForRollover(c.status)).length;
+      const pct = list.length ? Math.round((done * 100) / list.length) : 0;
+      subjSidebar.appendChild(
+        el('button', {
+          className: `subject-item ${roadmapSubject === subj.id ? 'active' : ''}`,
+          onClick: () => { roadmapSubject = subj.id; render(); }
+        }, [
+          el('div', { className: 'row-between' }, [
+            el('span', { text: lang === 'bn' ? subj.nameBn : subj.nameEn }),
+            el('span', { className: 'muted', text: `${num(done)}/${num(list.length)}` })
+          ]),
+          el('div', { className: 'progress-track', style: 'height:5px' }, [
+            el('div', { className: 'progress-fill', style: `width:${pct}%` })
+          ])
+        ])
+      );
+    });
+
+    const searchIn = el('input', {
+      type: 'text',
+      value: roadmapQuery,
+      placeholder: t('অধ্যায় বা বিষয় খুঁজুন...', 'Search chapter or subject...')
+    });
+    searchIn.addEventListener('input', (e) => {
+      roadmapQuery = e.target.value;
+      render();
+      const restored = document.querySelector('.roadmap-search');
+      if (restored) {
+        restored.focus();
+        restored.setSelectionRange(roadmapQuery.length, roadmapQuery.length);
+      }
+    });
+    searchIn.className = 'roadmap-search';
+
+    const filtered = enriched.filter((c) => {
+      const mSubj = roadmapSubject === 'ALL' || c.subjectId === roadmapSubject;
+      const mFilter = roadmapFilter === 'ALL' ||
+        (roadmapFilter === 'THIS_WEEK' && c.isCurrentWeek) ||
+        (roadmapFilter === 'OVERDUE' && c.isOverdue);
+      const q = roadmapQuery.trim().toLowerCase();
+      const mQ = !q || c.title.toLowerCase().includes(q) || c.subjectNameBn.toLowerCase().includes(q) || c.paper.toLowerCase().includes(q);
+      return mSubj && mFilter && mQ;
+    });
+
+    const activeSubj = PLAN.subjects.find((s) => s.id === roadmapSubject);
+
+    const rightPane = el('div', { className: 'stack' }, [
+      el('div', { className: 'row-between' }, [
+        el('div', { style: 'flex:1;min-width:220px' }, [searchIn]),
+        el('div', { className: 'row' }, [
+          el('button', { className: `chip ${roadmapFilter === 'ALL' ? 'active' : ''}`, text: t('সব', 'All'), onClick: () => { roadmapFilter = 'ALL'; render(); } }),
+          el('button', { className: `chip ${roadmapFilter === 'THIS_WEEK' ? 'active' : ''}`, text: t(`এই সপ্তাহ (${num(curWeek)})`, `Week ${curWeek}`), onClick: () => { roadmapFilter = 'THIS_WEEK'; render(); } }),
+          el('button', { className: `chip ${roadmapFilter === 'OVERDUE' ? 'active' : ''}`, text: t(`বকেয়া (${num(enriched.filter((c) => c.isOverdue).length)})`, `Overdue`), onClick: () => { roadmapFilter = 'OVERDUE'; render(); } })
+        ])
+      ])
+    ]);
+
+    if (activeSubj && activeSubj.noteBn) {
+      rightPane.appendChild(el('div', { className: 'card', style: 'border-color:var(--secondary)' }, [
+        el('span', { className: 'muted', text: activeSubj.noteBn })
+      ]));
+    }
+
+    const cardsGrid = el('div', { className: 'grid-2' }, filtered.map((ch) => {
+      const cls = ch.isOverdue ? 'overdue' : ch.isCurrentWeek ? 'current-week' : '';
+      return el('div', { className: `card stack ${cls}` }, [
+        el('div', { className: 'row-between' }, [
+          el('span', { className: 'badge', text: `${lang === 'bn' ? ch.subjectNameBn : ch.subjectNameEn} • ${ch.paper}` }),
+          ch.isOverdue
+            ? el('span', { className: 'badge error', text: t('বকেয়া', 'OVERDUE') })
+            : ch.isCurrentWeek
+            ? el('span', { className: 'badge primary', text: t('এই সপ্তাহ', 'THIS WEEK') })
+            : null
+        ]),
+        el('div', { className: 'row-between' }, [
+          el('strong', { text: ch.title, style: 'flex:1' }),
+          el('button', { className: 'btn small', text: '✏️', onClick: () => openEditChapterModal(ch) })
+        ]),
+        el('div', { className: 'row-between' }, [
+          el('span', {
+            className: 'muted',
+            text: `${t('সপ্তাহ', 'Wk')} ${num(ch.weekNumber)} • ${formatShortDate(ch.deadline, lang)}`
+          }),
+          renderStatusSelect(ch, (val) => {
+            appState.chapters = appState.chapters.map((item) => (item.id === ch.id ? { ...item, status: val } : item));
+            saveState();
+            render();
+          })
+        ])
+      ]);
+    }));
+
+    rightPane.appendChild(cardsGrid);
+    return el('div', { className: 'roadmap-split' }, [subjSidebar, rightPane]);
+  }
+
+  function renderWeekly(enriched) {
+    const lang = appState.settings.language;
+    const w = weeklySelectedWeek;
+    const pct = computeWeekPercent(w, enriched);
+    const belowGoal = pct < 80;
+    const tasksDone = new Set(appState.weeklyTasksCompleted[w] || []);
+    const fridayDone = new Set(appState.fridayChecklistCompleted[w] || []);
+    const weekCh = enriched.filter((c) => w >= c.startWeek && w <= c.effectiveWeek);
+
+    const leftPane = el('div', { className: 'stack' }, [
+      el('div', { className: 'card stack' }, [
+        el('div', { className: 'row-between' }, [
+          el('button', {
+            className: 'btn small',
+            text: '◀',
+            disabled: w <= 1,
+            onClick: () => { if (weeklySelectedWeek > 1) { weeklySelectedWeek--; render(); } }
+          }),
+          el('div', { style: 'text-align:center' }, [
+            el('strong', { text: t(`সপ্তাহ ${num(w)} / ২৬`, `Week ${w} / 26`) }),
+            el('div', { className: 'muted', text: `${formatShortDate(weekStartIso(w), lang)} – ${formatShortDate(weekDeadlineIso(w), lang)}` })
+          ]),
+          el('button', {
+            className: 'btn small',
+            text: '▶',
+            disabled: w >= 26,
+            onClick: () => { if (weeklySelectedWeek < 26) { weeklySelectedWeek++; render(); } }
+          })
+        ]),
+        el('div', { className: 'row-between' }, [
+          el('span', { text: t('সাপ্তাহিক লক্ষ্য: ৮০–৯০%', 'Weekly Target: 80–90%') }),
+          el('strong', { text: `${num(pct)}%`, style: `color:${belowGoal ? 'var(--error)' : 'var(--primary)'}` })
+        ]),
+        el('div', { className: 'progress-track' }, [
+          el('div', { className: 'progress-fill', style: `width:${pct}%;background:${belowGoal ? 'var(--error)' : 'var(--primary)'}` })
+        ])
+      ]),
+      el('div', { className: `card ${belowGoal ? 'overdue' : 'current-week'}` }, [
+        el('strong', {
+          text: belowGoal
+            ? t(`সতর্কতা: সম্পন্ন হার ৮০%-এর নিচে (${num(pct)}%)। কঠিন অধ্যায় বাদ না দিয়ে পরের সপ্তাহে রোলওভার করে শেষ করুন।`,
+                `Warning: Completion is below 80% (${pct}%). Never skip tough chapters—roll them over.`)
+            : t('দারুণ! সাপ্তাহিক লক্ষ্য (৮০%+) অর্জিত হয়েছে।', 'Great! 80%+ weekly goal reached.')
+        })
+      ]),
+      el('strong', { text: t('প্রতি সপ্তাহের বাধ্যতামূলক কাজ', 'Weekly Mandatory Tasks') }),
+      ...PLAN.weeklyMandatoryTasks.map((task) => {
+        const checked = tasksDone.has(task.id);
+        const cb = el('input', { type: 'checkbox', checked });
+        cb.addEventListener('change', () => {
+          const set = new Set(appState.weeklyTasksCompleted[w] || []);
+          if (set.has(task.id)) set.delete(task.id); else set.add(task.id);
+          appState.weeklyTasksCompleted[w] = Array.from(set);
+          saveState();
+          render();
+        });
+        return el('label', { className: `check-row ${checked ? 'checked' : ''}` }, [
+          cb,
+          el('span', { text: lang === 'bn' ? task.bn : task.en })
+        ]);
+      }),
+      el('strong', { text: t('শুক্রবার — সাপ্তাহিক পরীক্ষা চেকলিস্ট', 'Friday — Exam Checklist'), style: 'margin-top:8px' }),
+      ...PLAN.fridayExamChecklist.map((item) => {
+        const checked = fridayDone.has(item.id);
+        const cb = el('input', { type: 'checkbox', checked });
+        cb.addEventListener('change', () => {
+          const set = new Set(appState.fridayChecklistCompleted[w] || []);
+          if (set.has(item.id)) set.delete(item.id); else set.add(item.id);
+          appState.fridayChecklistCompleted[w] = Array.from(set);
+          saveState();
+          render();
+        });
+        return el('label', { className: `check-row ${checked ? 'checked' : ''}` }, [
+          cb,
+          el('span', { text: lang === 'bn' ? item.bn : item.en })
+        ]);
+      })
+    ]);
+
+    const rightPane = el('div', { className: 'stack' }, [
+      el('strong', { text: t(`সপ্তাহ ${num(w)}-এর অধ্যায়সমূহ (${num(weekCh.length)})`, `Chapters in Week ${w} (${weekCh.length})`) }),
+      ...weekCh.map((ch) => el('div', { className: `card row-between ${ch.isOverdue ? 'overdue' : ''}` }, [
+        el('div', { style: 'flex:1' }, [
+          el('div', { className: 'muted', text: `${lang === 'bn' ? ch.subjectNameBn : ch.subjectNameEn} • ${ch.paper}` }),
+          el('strong', { text: ch.title })
+        ]),
+        renderStatusSelect(ch, (val) => {
+          appState.chapters = appState.chapters.map((item) => (item.id === ch.id ? { ...item, status: val } : item));
+          saveState();
+          render();
+        })
+      ]))
+    ]);
+
+    return el('div', { className: 'grid-2' }, [leftPane, rightPane]);
+  }
+
+  function openAddMistakeModal() {
+    const subjSel = el('select');
+    PLAN.subjects.forEach((s) => subjSel.appendChild(el('option', { value: s.id, text: t(s.nameBn, s.nameEn) })));
+    const chIn = el('input', { type: 'text', placeholder: t('অধ্যায়ের নাম', 'Chapter title') });
+    const qIn = el('textarea', { rows: 3, placeholder: t('ভুল প্রশ্নটি লিখুন...', 'Enter the wrong question...') });
+    const aIn = el('textarea', { rows: 3, placeholder: t('সঠিক উত্তর / ব্যাখ্যা...', 'Correct answer / explanation...') });
+    const dIn = el('input', { type: 'date', value: todayIso() });
+
+    openModal(el('div', { className: 'stack' }, [
+      el('h3', { text: t('ভুলের খাতায় নতুন এন্ট্রি', 'Add Mistake Entry'), style: 'margin:0' }),
+      subjSel,
+      chIn,
+      qIn,
+      aIn,
+      dIn,
+      el('div', { className: 'row', style: 'justify-content:flex-end' }, [
+        el('button', { className: 'btn', text: t('বাতিল', 'Cancel'), onClick: closeModal }),
+        el('button', {
+          className: 'btn primary',
+          text: t('সংরক্ষণ', 'Save'),
+          onClick: () => {
+            if (!qIn.value.trim() || !aIn.value.trim()) return;
+            const subj = PLAN.subjects.find((s) => s.id === subjSel.value);
+            appState.mistakes.unshift({
+              id: `m_${Date.now()}`,
+              subjectId: subjSel.value,
+              subjectNameBn: subj ? subj.nameBn : '',
+              subjectNameEn: subj ? subj.nameEn : '',
+              chapterTitle: chIn.value.trim(),
+              question: qIn.value.trim(),
+              correctAnswer: aIn.value.trim(),
+              date: dIn.value || todayIso(),
+              revised: false
+            });
+            saveState();
+            closeModal();
+            render();
+          }
+        })
+      ])
+    ]));
+  }
+
+  function renderMistakes() {
+    const lang = appState.settings.language;
+    const filtered = appState.mistakes.filter((m) => {
+      const mRev = mistakeFilter === 'ALL' || (mistakeFilter === 'UNREVISED' && !m.revised) || (mistakeFilter === 'REVISED' && m.revised);
+      const mSub = mistakeSubjectFilter === 'ALL' || m.subjectId === mistakeSubjectFilter;
+      return mRev && mSub;
+    });
+
+    const header = el('div', { className: 'row-between' }, [
+      el('div', { className: 'row' }, [
+        el('button', { className: `chip ${mistakeFilter === 'ALL' ? 'active' : ''}`, text: t(`সব (${num(appState.mistakes.length)})`, `All (${appState.mistakes.length})`), onClick: () => { mistakeFilter = 'ALL'; render(); } }),
+        el('button', { className: `chip ${mistakeFilter === 'UNREVISED' ? 'active' : ''}`, text: t('রিভিশন বাকি', 'Unrevised'), onClick: () => { mistakeFilter = 'UNREVISED'; render(); } }),
+        el('button', { className: `chip ${mistakeFilter === 'REVISED' ? 'active' : ''}`, text: t('রিভাইজড', 'Revised'), onClick: () => { mistakeFilter = 'REVISED'; render(); } })
+      ]),
+      el('button', { className: 'btn primary', text: t('+ ভুল যোগ করুন', '+ Add Mistake'), onClick: openAddMistakeModal })
+    ]);
+
+    const subjRow = el('div', { className: 'row' }, [
+      el('button', { className: `chip ${mistakeSubjectFilter === 'ALL' ? 'active' : ''}`, text: t('সব বিষয়', 'All Subjects'), onClick: () => { mistakeSubjectFilter = 'ALL'; render(); } }),
+      ...PLAN.subjects.map((s) => el('button', {
+        className: `chip ${mistakeSubjectFilter === s.id ? 'active' : ''}`,
+        text: lang === 'bn' ? s.nameBn : s.nameEn,
+        onClick: () => { mistakeSubjectFilter = s.id; render(); }
+      }))
+    ]);
+
+    if (filtered.length === 0) {
+      return el('div', { className: 'stack' }, [
+        header,
+        subjRow,
+        el('div', { className: 'card stack', style: 'text-align:center;padding:36px' }, [
+          el('strong', { text: t('ভুলের খাতা এখন খালি', 'Mistake Notebook is empty') }),
+          el('span', { className: 'muted', text: t('অনুশীলন বা সাপ্তাহিক পরীক্ষায় ভুল হওয়া প্রশ্ন ও সঠিক উত্তর এখানে সংরক্ষণ করুন।', 'Log wrong questions and correct answers here to revise later.') })
+        ])
+      ]);
+    }
+
+    const grid = el('div', { className: 'grid-2' }, filtered.map((m) =>
+      el('div', { className: `card stack ${m.revised ? 'current-week' : ''}` }, [
+        el('div', { className: 'row-between' }, [
+          el('span', { className: 'badge primary', text: lang === 'bn' ? m.subjectNameBn : m.subjectNameEn }),
+          el('span', { className: 'muted', text: formatShortDate(m.date, lang) })
+        ]),
+        m.chapterTitle ? el('span', { className: 'badge warn', text: m.chapterTitle }) : null,
+        el('strong', { text: `${t('প্রশ্ন:', 'Q:')} ${m.question}` }),
+        el('div', { className: 'card', style: 'background:var(--primary-bg);border:none;padding:10px' }, [
+          el('span', { text: `${t('সঠিক উত্তর:', 'Answer:')} ${m.correctAnswer}` })
+        ]),
+        el('div', { className: 'row-between' }, [
+          el('button', {
+            className: `chip ${m.revised ? 'active' : ''}`,
+            text: m.revised ? t('✓ রিভিশন সম্পন্ন', '✓ Revised') : t('রিভাইজড চিহ্নিত করুন', 'Mark Revised'),
+            onClick: () => {
+              appState.mistakes = appState.mistakes.map((x) => (x.id === m.id ? { ...x, revised: !x.revised } : x));
+              saveState();
+              render();
+            }
+          }),
+          el('button', {
+            className: 'btn small danger',
+            text: t('মুছুন', 'Delete'),
+            onClick: () => {
+              appState.mistakes = appState.mistakes.filter((x) => x.id !== m.id);
+              saveState();
+              render();
+            }
+          })
+        ])
+      ])
+    ));
+
+    return el('div', { className: 'stack' }, [header, subjRow, grid]);
+  }
+
+  function renderProgress(enriched) {
+    const lang = appState.settings.language;
+    const tIso = todayIso();
+    const curWeek = currentWeekNumber(tIso);
+    const daysLeft = Math.max(0, daysBetween(tIso, PLAN_END));
+    const total = enriched.length;
+    const done = enriched.filter((c) => isFinishedForRollover(c.status)).length;
+    const overallPct = total ? Math.round((done * 100) / total) : 0;
+
+    let weeklyStreak = 0;
+    for (let w = curWeek; w >= 1; w--) {
+      if (computeWeekPercent(w, enriched) >= 80) weeklyStreak++;
+      else if (w < curWeek) break;
+    }
+
+    let dailyStreak = 0;
+    let cursor = parseIsoLocal(tIso);
+    const keyOf = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    if (!(appState.dailyCompletedSlots[keyOf(cursor)] || []).length) {
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    while ((appState.dailyCompletedSlots[keyOf(cursor)] || []).length > 0 && dailyStreak < 365) {
+      dailyStreak++;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+
+    const topGrid = el('div', { className: 'grid-3' }, [
+      el('div', { className: 'card hero stack' }, [
+        el('span', { className: 'muted', text: t('২৩ মে ২০২৭ পর্যন্ত বাকি', 'Countdown to 23 May 2027') }),
+        el('div', { className: 'timer-readout', text: t(`${num(daysLeft)} দিন`, `${daysLeft} days`) }),
+        el('div', { className: 'row-between' }, [
+          el('span', { text: t(`সামগ্রিক: ${num(done)}/${num(total)}`, `Overall: ${done}/${total}`) }),
+          el('strong', { text: `${num(overallPct)}%` })
+        ]),
+        el('div', { className: 'progress-track' }, [el('div', { className: 'progress-fill', style: `width:${overallPct}%` })])
+      ]),
+      el('div', { className: 'card stack' }, [
+        el('span', { className: 'muted', text: t('সাপ্তাহিক স্ট্রিক (৮০%+)', 'Weekly Streak (80%+)') }),
+        el('div', { className: 'timer-readout', style: 'color:var(--primary)', text: t(`${num(weeklyStreak)} সপ্তাহ`, `${weeklyStreak} wks`) })
+      ]),
+      el('div', { className: 'card stack' }, [
+        el('span', { className: 'muted', text: t('দৈনিক স্টাডি স্ট্রিক', 'Daily Study Streak') }),
+        el('div', { className: 'timer-readout', style: 'color:var(--secondary)', text: t(`${num(dailyStreak)} দিন`, `${dailyStreak} days`) })
+      ])
+    ]);
+
+    const subjGrid = el('div', { className: 'grid-2' }, PLAN.subjects.map((subj) => {
+      const list = enriched.filter((c) => c.subjectId === subj.id);
+      const sDone = list.filter((c) => isFinishedForRollover(c.status)).length;
+      const sOver = list.filter((c) => c.isOverdue).length;
+      const pct = list.length ? Math.round((sDone * 100) / list.length) : 0;
+      return el('div', { className: 'card stack' }, [
+        el('div', { className: 'row-between' }, [
+          el('strong', { text: lang === 'bn' ? subj.nameBn : subj.nameEn }),
+          el('strong', { text: `${num(pct)}%`, style: 'color:var(--primary)' })
+        ]),
+        el('div', { className: 'muted', text: `${num(sDone)}/${num(list.length)} ${t('সম্পন্ন', 'done')}${sOver ? ` • ${num(sOver)} ${t('বকেয়া', 'overdue')}` : ''}` }),
+        el('div', { className: 'progress-track' }, [el('div', { className: 'progress-fill', style: `width:${pct}%` })])
+      ]);
+    }));
+
+    return el('div', { className: 'stack' }, [
+      topGrid,
+      el('strong', { text: t('বিষয়ভিত্তিক অগ্রগতি', 'Subject Progress'), style: 'margin-top:8px' }),
+      subjGrid
+    ]);
+  }
+
+  function renderSettings(enriched) {
+    const lang = appState.settings.language;
+
+    const hoursRow = el('div', { className: 'card stack' }, [
+      el('strong', { text: t('দৈনিক পড়ার সময়', 'Daily Study Hours') }),
+      el('div', { className: 'row' }, [
+        el('button', {
+          className: `chip ${appState.settings.dailyHours === 5 ? 'active' : ''}`,
+          text: t('৫ ঘণ্টা (৭৫ মি. × ৪)', '5h (75m × 4)'),
+          onClick: () => { appState.settings.dailyHours = 5; saveState(); render(); }
+        }),
+        el('button', {
+          className: `chip ${appState.settings.dailyHours === 3 ? 'active' : ''}`,
+          text: t('৩ ঘণ্টা (৪৫ মি. × ৪)', '3h (45m × 4)'),
+          onClick: () => { appState.settings.dailyHours = 3; saveState(); render(); }
+        })
+      ])
+    ]);
+
+    const notifCard = el('div', { className: 'card stack' }, [
+      el('strong', { text: t('ডেস্কটপ নোটিফিকেশন ও ব্যাকআপ', 'Desktop Notifications & Backup') }),
+      el('div', { className: 'row' }, [
+        el('button', {
+          className: `chip ${appState.settings.notificationsEnabled ? 'active' : ''}`,
+          text: appState.settings.notificationsEnabled ? t('নোটিফিকেশন চালু আছে', 'Notifications ON') : t('নোটিফিকেশন চালু করুন', 'Enable Notifications'),
+          onClick: async () => {
+            if ('Notification' in window) {
+              const perm = await Notification.requestPermission();
+              appState.settings.notificationsEnabled = perm === 'granted';
+              saveState();
+              if (perm === 'granted') notify('HSC স্টাডি', t('নোটিফিকেশন চালু হয়েছে!', 'Notifications enabled!'));
+              render();
+            }
+          }
+        }),
+        el('button', {
+          className: 'btn small',
+          text: t('JSON ব্যাকআপ ডাউনলোড', 'Export JSON'),
+          onClick: () => {
+            const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `hsc_study_backup_${todayIso()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }
+        }),
+        el('label', { className: 'btn small', style: 'cursor:pointer' }, [
+          el('span', { text: t('JSON ইমপোর্ট', 'Import JSON') }),
+          (() => {
+            const inp = el('input', { type: 'file', accept: '.json,application/json', style: 'display:none' });
+            inp.addEventListener('change', (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => {
+                try {
+                  const data = JSON.parse(reader.result);
+                  if (data && Array.isArray(data.chapters) && data.chapters.length) {
+                    appState = data;
+                    saveState();
+                    render();
+                  }
+                } catch {}
+              };
+              reader.readAsText(file);
+            });
+            return inp;
+          })()
+        ]),
+        el('button', {
+          className: 'btn small danger',
+          text: t('সব রিসেট', 'Reset All'),
+          onClick: () => {
+            if (confirm(t('সব অগ্রগতি রিসেট করবেন?', 'Reset all progress to default?'))) {
+              appState = buildInitialState();
+              saveState();
+              render();
+            }
+          }
+        })
+      ])
+    ]);
+
+    const subjTabs = el('div', { className: 'row' }, PLAN.subjects.map((s) =>
+      el('button', {
+        className: `chip ${settingsEditSubject === s.id ? 'active' : ''}`,
+        text: lang === 'bn' ? s.nameBn : s.nameEn,
+        onClick: () => { settingsEditSubject = s.id; render(); }
+      })
+    ));
+
+    const chList = enriched.filter((c) => c.subjectId === settingsEditSubject);
+    const editorGrid = el('div', { className: 'grid-2' }, chList.map((ch) =>
+      el('div', { className: 'card row-between' }, [
+        el('div', { style: 'flex:1' }, [
+          el('strong', { text: ch.title }),
+          el('div', { className: 'muted', text: `${ch.paper} • ${t('সপ্তাহ', 'Wk')} ${num(ch.weekNumber)} • ${ch.deadline}` })
+        ]),
+        el('div', { className: 'row' }, [
+          el('button', { className: 'btn small', text: '✏️', onClick: () => openEditChapterModal(ch) }),
+          el('button', {
+            className: 'btn small danger',
+            text: '🗑️',
+            onClick: () => {
+              appState.chapters = appState.chapters.filter((x) => x.id !== ch.id);
+              saveState();
+              render();
+            }
+          })
+        ])
+      ])
+    ));
+
+    return el('div', { className: 'stack' }, [
+      el('div', { className: 'grid-2' }, [hoursRow, notifCard]),
+      el('strong', { text: t('অধ্যায় ও ডেডলাইন এডিট (২০২৮ সিলেবাস / ইংরেজি ইউনিট)', 'Edit Chapters & Deadlines') }),
+      subjTabs,
+      editorGrid
+    ]);
+  }
+
+  function render() {
+    const lang = appState.settings.language;
+    document.body.classList.toggle('light', !appState.settings.darkMode);
+
+    const navDefs = [
+      { id: 'today', icon: '📅', label: t('আজ', 'Today') },
+      { id: 'roadmap', icon: '🗺️', label: t('রোডম্যাপ', 'Roadmap') },
+      { id: 'weekly', icon: '✅', label: t('সাপ্তাহিক', 'Weekly') },
+      { id: 'mistakes', icon: '📓', label: t('ভুলের খাতা', 'Mistakes') },
+      { id: 'progress', icon: '📊', label: t('অগ্রগতি', 'Progress') },
+      { id: 'settings', icon: '⚙️', label: t('সেটিংস', 'Settings') }
+    ];
+
+    document.getElementById('brandTitle').textContent = t('HSC ২০২৮ বিজ্ঞান', 'HSC 2028 Science');
+    document.getElementById('brandSub').textContent = t('২৬ সপ্তাহের ডেস্কটপ স্টাডি প্ল্যান', '26-Week Desktop Study Plan');
+    document.getElementById('langToggleBtn').textContent = lang === 'bn' ? 'English' : 'বাংলা';
+    document.getElementById('themeToggleBtn').textContent = appState.settings.darkMode ? '☀️ Light' : '🌙 Dark';
+
+    const curWeek = currentWeekNumber();
+    const daysLeft = Math.max(0, daysBetween(todayIso(), PLAN_END));
+    document.getElementById('topbarWeekBadge').textContent = t(`সপ্তাহ ${num(curWeek)}/২৬`, `Week ${curWeek}/26`);
+    document.getElementById('sidebarCountdown').textContent = t(`২৩ মে ২০২৭ বাকি: ${num(daysLeft)} দিন`, `${daysLeft} days to 23 May 2027`);
+
+    const navList = document.getElementById('navList');
+    navList.innerHTML = '';
+    navDefs.forEach((n) => {
+      const btn = el('button', {
+        className: `nav-btn ${currentScreen === n.id ? 'active' : ''}`,
+        onClick: () => { currentScreen = n.id; render(); }
+      }, [`${n.icon} ${n.label}`]);
+      navList.appendChild(btn);
+    });
+
+    const activeNav = navDefs.find((n) => n.id === currentScreen);
+    document.getElementById('pageTitle').textContent = activeNav ? activeNav.label : '';
+
+    const enriched = getChaptersWithRollover();
+    const main = document.getElementById('mainContent');
+    main.innerHTML = '';
+
+    if (currentScreen === 'today') main.appendChild(renderToday(enriched));
+    else if (currentScreen === 'roadmap') main.appendChild(renderRoadmap(enriched));
+    else if (currentScreen === 'weekly') main.appendChild(renderWeekly(enriched));
+    else if (currentScreen === 'mistakes') main.appendChild(renderMistakes());
+    else if (currentScreen === 'progress') main.appendChild(renderProgress(enriched));
+    else if (currentScreen === 'settings') main.appendChild(renderSettings(enriched));
+  }
+
+  document.getElementById('langToggleBtn').addEventListener('click', () => {
+    appState.settings.language = appState.settings.language === 'bn' ? 'en' : 'bn';
+    saveState();
+    render();
+  });
+
+  document.getElementById('themeToggleBtn').addEventListener('click', () => {
+    appState.settings.darkMode = !appState.settings.darkMode;
+    saveState();
+    render();
+  });
+
+  // PWA Install button on Desktop Chrome/Edge
+  let deferredInstallPrompt = null;
+  const installBtn = document.getElementById('installPromptBtn');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    installBtn.style.display = 'inline-flex';
+  });
+  installBtn.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    installBtn.style.display = 'none';
+  });
+
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+
+  render();
+})();
+
+</script>
+</body>
+</html>

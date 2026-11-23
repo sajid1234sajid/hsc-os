@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HSC স্টাডি — ২০২৮ বিজ্ঞান (Desktop App)</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="./icon.svg" alt="HSC Study Logo" />
+        <div>
+          <div class="brand-title" id="brandTitle">HSC ২০২৮ বিজ্ঞান</div>
+          <div class="brand-sub" id="brandSub">২৬ সপ্তাহের স্টাডি প্ল্যান</div>
+        </div>
+      </div>
+
+      <nav class="nav-list" id="navList"></nav>
+
+      <div class="sidebar-footer">
+        <div class="pill-row">
+          <button class="btn small" id="langToggleBtn" style="flex:1">বাংলা / EN</button>
+          <button class="btn small" id="themeToggleBtn" style="flex:1">🌙 / ☀️</button>
+        </div>
+        <div class="muted" id="sidebarCountdown"></div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <h1 id="pageTitle">আজ</h1>
+        <div class="row">
+          <span class="badge primary" id="topbarWeekBadge"></span>
+          <button class="btn small" id="installPromptBtn" style="display:none">ডেস্কটপ অ্যাপ ইনস্টল</button>
+        </div>
+      </header>
+
+      <section class="content" id="mainContent"></section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal-card" id="modalCard"></div>
+  </div>
+
+  <script src="./data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

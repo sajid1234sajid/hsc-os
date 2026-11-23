@@ -1,0 +1,30 @@
+{
+  "name": "HSC স্টাডি — ২০২৮ বিজ্ঞান",
+  "short_name": "HSC স্টাডি",
+  "description": "HSC ২০২৮ বিজ্ঞান বিভাগের ২৬ সপ্তাহের ডেস্কটপ ও অফলাইন স্টাডি প্ল্যান",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b1117",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+name: Deploy Desktop App & Build Windows Installer
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy-pages:
+    name: Host Desktop PWA on GitHub Pages
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload desktop-app artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./desktop-app
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  build-windows-exe:
+    name: Build Windows Desktop Installer (.exe)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Electron dependencies
+        working-directory: ./desktop-app
+        run: npm install
+
+      - name: Build Windows NSIS installer
+        working-directory: ./desktop-app
+        run: npm run build-win
+
+      - name: Upload Windows .exe Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: HSC-Study-Plan-Windows-Exe
+          path: desktop-app/dist/*.exe
+          if-no-files-found: error

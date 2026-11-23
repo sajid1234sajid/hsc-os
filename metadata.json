@@ -1,0 +1,6 @@
+{
+  "name": "HSC স্টাডি",
+  "description": "HSC ২০২৮ বিজ্ঞান বিভাগের ২৬ সপ্তাহের স্টাডি প্ল্যান, ৭৫ মিনিটের সেশন টাইমার, রোডম্যাপ ট্র্যাকার, ভুলের খাতা ও অগ্রগতি বিশ্লেষণ অ্যাপ।",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
