@@ -4,11 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -19,9 +22,12 @@ import androidx.compose.material.icons.automirrored.filled.FactCheck
 import androidx.compose.material.icons.automirrored.outlined.FactCheck
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.outlined.Assessment
 import androidx.compose.material.icons.outlined.AutoAwesome
@@ -30,6 +36,7 @@ import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Today
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,18 +53,28 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CredentialManager
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -66,8 +83,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.ai.AiChatViewModel
 import com.example.ai.configureAppCheck
+import com.example.auth.signOutWithCleanup
 import com.example.data.AppLanguage
+import com.example.data.FirestoreStudyRepository
 import com.example.data.StringsProvider
+import com.example.data.StudyRepository
 import com.example.ui.screens.AiChatScreen
 import com.example.ui.screens.MistakeNotebookScreen
 import com.example.ui.screens.ProgressScreen
@@ -76,7 +96,12 @@ import com.example.ui.screens.SettingsScreen
 import com.example.ui.screens.TodayScreen
 import com.example.ui.screens.WeeklyScreen
 import com.example.ui.theme.HscStudyTheme
+import com.example.ui.viewmodel.StudyReminderController
 import com.example.ui.viewmodel.StudyViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 
 private sealed class AppDestination(
     val route: String,
@@ -107,17 +132,106 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            val viewModel: StudyViewModel = viewModel()
-            val aiChatViewModel: AiChatViewModel = viewModel()
-            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            AppContent()
+        }
+    }
+}
 
-            HscStudyTheme(darkTheme = state.settings.darkMode) {
-                HscStudyApp(
-                    viewModel = viewModel,
-                    aiChatViewModel = aiChatViewModel
+@Composable
+private fun AppContent() {
+    var currentUser by remember { mutableStateOf(Firebase.auth.currentUser) }
+    DisposableEffect(Unit) {
+        val listener = FirebaseAuth.AuthStateListener { auth ->
+            currentUser = auth.currentUser
+        }
+        Firebase.auth.addAuthStateListener(listener)
+        onDispose { Firebase.auth.removeAuthStateListener(listener) }
+    }
+
+    val user = currentUser
+    val sessionKey = user?.uid ?: "guest_local"
+    key(sessionKey) {
+        StudyAppSessionScope(
+            sessionKey = sessionKey,
+            currentUserId = user?.uid,
+            userDisplayName = user?.displayName ?: "",
+            userEmail = user?.email,
+            onAuthStateRefresh = { currentUser = Firebase.auth.currentUser }
+        )
+    }
+}
+
+@Composable
+private fun StudyAppSessionScope(
+    sessionKey: String,
+    currentUserId: String?,
+    userDisplayName: String,
+    userEmail: String?,
+    onAuthStateRefresh: () -> Unit
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val credentialManager = remember(context) { CredentialManager.create(context) }
+
+    val viewModel: StudyViewModel = viewModel(
+        key = sessionKey,
+        factory = viewModelFactory {
+            initializer {
+                val app = checkNotNull(this[APPLICATION_KEY]) {
+                    "APPLICATION_KEY missing from CreationExtras"
+                }
+                val repo = if (currentUserId != null) {
+                    val databaseId = app.getString(R.string.firestore_database_id)
+                    val db = FirebaseFirestore.getInstance(databaseId)
+                    FirestoreStudyRepository(
+                        db = db,
+                        planProvider = {
+                            val moshi = com.squareup.moshi.Moshi.Builder()
+                                .addLast(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory())
+                                .build()
+                            val adapter = moshi.adapter(com.example.data.StudyPlanAsset::class.java)
+                            val json = app.assets.open("study_plan.json").bufferedReader().use { it.readText() }
+                            adapter.fromJson(json) ?: throw IllegalStateException("Failed to parse study_plan.json")
+                        },
+                        legacyLocalFile = java.io.File(app.filesDir, "hsc_study_state.json")
+                    )
+                } else {
+                    // Pure local device storage when signed out — never invokes Firestore
+                    StudyRepository(app.applicationContext)
+                }
+                StudyViewModel(
+                    repository = repo,
+                    currentUserId = currentUserId,
+                    reminderController = StudyReminderController(app.applicationContext)
                 )
             }
         }
+    )
+    val aiChatViewModel: AiChatViewModel = viewModel(key = "ai_$sessionKey")
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    HscStudyTheme(darkTheme = state.settings.darkMode) {
+        HscStudyApp(
+            viewModel = viewModel,
+            aiChatViewModel = aiChatViewModel,
+            isSignedIn = currentUserId != null,
+            userDisplayName = userDisplayName,
+            userEmail = userEmail,
+            onSignInSuccess = onAuthStateRefresh,
+            onSignOut = {
+                signOutWithCleanup(
+                    credentialManager = credentialManager,
+                    scope = scope,
+                    onBeforeSignOut = {
+                        viewModel.stopRuntimeTicker()
+                        viewModel.currentPersistedSnapshot()?.let { snapshot ->
+                            StudyRepository(context.applicationContext).saveSnapshot(snapshot)
+                        }
+                    },
+                    onSignOutComplete = onAuthStateRefresh
+                )
+            }
+        )
     }
 }
 
@@ -125,7 +239,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun HscStudyApp(
     viewModel: StudyViewModel,
-    aiChatViewModel: AiChatViewModel
+    aiChatViewModel: AiChatViewModel,
+    isSignedIn: Boolean,
+    userDisplayName: String,
+    userEmail: String?,
+    onSignInSuccess: () -> Unit,
+    onSignOut: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val chatState by aiChatViewModel.uiState.collectAsStateWithLifecycle()
@@ -195,24 +314,65 @@ private fun HscStudyApp(
                         )
                     },
                     navigationIcon = {
-                        Surface(
-                            onClick = {
-                                viewModel.setLanguage(if (lang == AppLanguage.BN) AppLanguage.EN else AppLanguage.BN)
-                            },
-                            shape = RoundedCornerShape(10.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            modifier = Modifier
-                                .padding(start = 12.dp)
-                                .minimumInteractiveComponentSize()
-                                .testTag("language_toggle_chip")
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(start = 10.dp)
                         ) {
-                            Text(
-                                text = if (lang == AppLanguage.BN) "বাং" else "EN",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                            )
+                            Surface(
+                                onClick = {
+                                    viewModel.setLanguage(if (lang == AppLanguage.BN) AppLanguage.EN else AppLanguage.BN)
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                modifier = Modifier
+                                    .minimumInteractiveComponentSize()
+                                    .testTag("language_toggle_chip")
+                            ) {
+                                Text(
+                                    text = if (lang == AppLanguage.BN) "বাং" else "EN",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                )
+                            }
+
+                            val syncIcon = when {
+                                !state.isCloudBacked -> Icons.Filled.CloudOff
+                                state.hasPendingWrites -> Icons.Filled.Sync
+                                state.isFromCache -> Icons.Filled.CloudOff
+                                else -> Icons.Filled.CloudDone
+                            }
+                            val syncDesc = when {
+                                !state.isCloudBacked -> StringsProvider.text(
+                                    lang,
+                                    "অফলাইন লোকাল মোড — ক্লাউড সিঙ্ক চালু করতে সেটিংস খুলুন",
+                                    "Offline local mode — open Settings to enable cloud sync"
+                                )
+                                state.hasPendingWrites || state.isFromCache -> StringsProvider.text(
+                                    lang,
+                                    "অফলাইন অটো-সিঙ্ক",
+                                    "Offline auto-sync"
+                                )
+                                else -> StringsProvider.text(lang, "ক্লাউডে সিঙ্কড", "Cloud synced")
+                            }
+                            IconButton(
+                                onClick = { navigateTo(AppDestination.Settings.route) },
+                                modifier = Modifier
+                                    .minimumInteractiveComponentSize()
+                                    .testTag("top_sync_status_button")
+                            ) {
+                                Icon(
+                                    imageVector = syncIcon,
+                                    contentDescription = syncDesc,
+                                    tint = when {
+                                        !state.isCloudBacked -> MaterialTheme.colorScheme.onSurfaceVariant
+                                        state.hasPendingWrites || state.isFromCache -> MaterialTheme.colorScheme.secondary
+                                        else -> MaterialTheme.colorScheme.primary
+                                    },
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
                     },
                     actions = {
@@ -315,108 +475,131 @@ private fun HscStudyApp(
                 }
             }
         ) { innerPadding ->
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
-                if (useRail) {
-                    NavigationRail(
-                        containerColor = MaterialTheme.colorScheme.surface
+            if (state.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator()
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            text = StringsProvider.text(lang, "স্টাডি প্ল্যান লোড হচ্ছে...", "Loading study plan..."),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                ) {
+                    if (useRail) {
+                        NavigationRail(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ) {
+                            railTabs.forEach { dest ->
+                                val selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true
+                                NavigationRailItem(
+                                    selected = selected,
+                                    onClick = { navigateTo(dest.route) },
+                                    icon = {
+                                        Icon(
+                                            imageVector = if (selected) dest.selectedIcon else dest.unselectedIcon,
+                                            contentDescription = dest.labelProvider(lang)
+                                        )
+                                    },
+                                    label = {
+                                        Text(
+                                            text = dest.labelProvider(lang),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    },
+                                    modifier = Modifier.testTag("rail_${dest.route}")
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(4.dp))
+                    }
+
+                    NavHost(
+                        navController = navController,
+                        startDestination = AppDestination.Today.route,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        railTabs.forEach { dest ->
-                            val selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true
-                            NavigationRailItem(
-                                selected = selected,
-                                onClick = { navigateTo(dest.route) },
-                                icon = {
-                                    Icon(
-                                        imageVector = if (selected) dest.selectedIcon else dest.unselectedIcon,
-                                        contentDescription = dest.labelProvider(lang)
-                                    )
-                                },
-                                label = {
-                                    Text(
-                                        text = dest.labelProvider(lang),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                                modifier = Modifier.testTag("rail_${dest.route}")
+                        composable(AppDestination.Today.route) {
+                            TodayScreen(
+                                state = state,
+                                onToggleTimer = viewModel::toggleSessionTimer,
+                                onResetTimer = viewModel::resetSessionTimer,
+                                onToggleSlotDone = viewModel::toggleSlotDone,
+                                onStartBreak = viewModel::startBreakTimer,
+                                onStopBreak = viewModel::stopBreakTimer,
+                                onUpdateChapterStatus = viewModel::updateChapterStatus,
+                                onNavigateToRoadmap = { navigateTo(AppDestination.Roadmap.route) }
                             )
                         }
-                    }
-                    Spacer(Modifier.width(4.dp))
-                }
-
-                NavHost(
-                    navController = navController,
-                    startDestination = AppDestination.Today.route,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    composable(AppDestination.Today.route) {
-                        TodayScreen(
-                            state = state,
-                            onToggleTimer = viewModel::toggleSessionTimer,
-                            onResetTimer = viewModel::resetSessionTimer,
-                            onToggleSlotDone = viewModel::toggleSlotDone,
-                            onStartBreak = viewModel::startBreakTimer,
-                            onStopBreak = viewModel::stopBreakTimer,
-                            onUpdateChapterStatus = viewModel::updateChapterStatus,
-                            onNavigateToRoadmap = { navigateTo(AppDestination.Roadmap.route) }
-                        )
-                    }
-                    composable(AppDestination.Roadmap.route) {
-                        RoadmapScreen(
-                            state = state,
-                            onUpdateStatus = viewModel::updateChapterStatus,
-                            onEditChapter = viewModel::editChapter
-                        )
-                    }
-                    composable(AppDestination.Weekly.route) {
-                        WeeklyScreen(
-                            state = state,
-                            onSelectWeek = viewModel::selectWeeklyViewWeek,
-                            onToggleMandatoryTask = viewModel::toggleWeeklyTask,
-                            onToggleFridayItem = viewModel::toggleFridayChecklistItem,
-                            onUpdateChapterStatus = viewModel::updateChapterStatus
-                        )
-                    }
-                    composable(AppDestination.Mistakes.route) {
-                        MistakeNotebookScreen(
-                            state = state,
-                            onAddMistake = viewModel::addMistake,
-                            onToggleRevised = viewModel::toggleMistakeRevised,
-                            onDeleteMistake = viewModel::deleteMistake
-                        )
-                    }
-                    composable(AppDestination.Progress.route) {
-                        ProgressScreen(state = state)
-                    }
-                    composable(AppDestination.AiTutor.route) {
-                        AiChatScreen(
-                            chatState = chatState,
-                            studyState = state,
-                            onSelectRole = aiChatViewModel::selectRole,
-                            onSendMessage = { prompt -> aiChatViewModel.sendMessage(prompt, lang) },
-                            onClearChat = aiChatViewModel::clearCurrentChat
-                        )
-                    }
-                    composable(AppDestination.Settings.route) {
-                        SettingsScreen(
-                            state = state,
-                            onSetDailyHours = viewModel::setDailyHours,
-                            onSetLanguage = viewModel::setLanguage,
-                            onToggleDarkMode = viewModel::toggleDarkMode,
-                            onSetNotificationsEnabled = viewModel::setNotificationsEnabled,
-                            onSendTestNotification = viewModel::sendTestNotification,
-                            onEditChapter = viewModel::editChapter,
-                            onAddChapter = viewModel::addChapter,
-                            onDeleteChapter = viewModel::deleteChapter,
-                            onExportJson = viewModel::exportBackupJson,
-                            onImportJson = viewModel::importBackupJson,
-                            onResetAll = viewModel::resetAllData
-                        )
+                        composable(AppDestination.Roadmap.route) {
+                            RoadmapScreen(
+                                state = state,
+                                onUpdateStatus = viewModel::updateChapterStatus,
+                                onEditChapter = viewModel::editChapter
+                            )
+                        }
+                        composable(AppDestination.Weekly.route) {
+                            WeeklyScreen(
+                                state = state,
+                                onSelectWeek = viewModel::selectWeeklyViewWeek,
+                                onToggleMandatoryTask = viewModel::toggleWeeklyTask,
+                                onToggleFridayItem = viewModel::toggleFridayChecklistItem,
+                                onUpdateChapterStatus = viewModel::updateChapterStatus
+                            )
+                        }
+                        composable(AppDestination.Mistakes.route) {
+                            MistakeNotebookScreen(
+                                state = state,
+                                onAddMistake = viewModel::addMistake,
+                                onToggleRevised = viewModel::toggleMistakeRevised,
+                                onDeleteMistake = viewModel::deleteMistake
+                            )
+                        }
+                        composable(AppDestination.Progress.route) {
+                            ProgressScreen(state = state)
+                        }
+                        composable(AppDestination.AiTutor.route) {
+                            AiChatScreen(
+                                chatState = chatState,
+                                studyState = state,
+                                onSelectRole = aiChatViewModel::selectRole,
+                                onSendMessage = { prompt -> aiChatViewModel.sendMessage(prompt, lang) },
+                                onClearChat = aiChatViewModel::clearCurrentChat
+                            )
+                        }
+                        composable(AppDestination.Settings.route) {
+                            SettingsScreen(
+                                state = state,
+                                isSignedIn = isSignedIn,
+                                userDisplayName = userDisplayName,
+                                userEmail = userEmail,
+                                onSignInSuccess = onSignInSuccess,
+                                onSignOut = onSignOut,
+                                onSetDailyHours = viewModel::setDailyHours,
+                                onSetLanguage = viewModel::setLanguage,
+                                onToggleDarkMode = viewModel::toggleDarkMode,
+                                onSetNotificationsEnabled = viewModel::setNotificationsEnabled,
+                                onSendTestNotification = viewModel::sendTestNotification,
+                                onEditChapter = viewModel::editChapter,
+                                onAddChapter = viewModel::addChapter,
+                                onDeleteChapter = viewModel::deleteChapter,
+                                onExportJson = viewModel::exportBackupJson,
+                                onImportJson = viewModel::importBackupJson,
+                                onResetAll = viewModel::resetAllData
+                            )
+                        }
                     }
                 }
             }

@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.example.data.ChapterStatus
 import com.example.data.StudyDateUtils
 import com.example.data.StudyRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -58,22 +59,27 @@ class ExampleRobolectricTest {
     fun repositoryPersistsAndRoundTripsJsonBackup() = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val repo = StudyRepository(context)
-        val initial = repo.initialize()
-        assertTrue(initial.chapters.isNotEmpty())
+        val initResult = repo.initialize(null)
+        assertTrue(initResult.isSuccess)
+        val initial = repo.observeStudyState(null).first()
+        assertFalse(initial.isCloudBacked)
+        assertTrue(initial.persistedState.chapters.isNotEmpty())
 
         repo.updateChapterStatus("phy_1", ChapterStatus.EXAM_TAKEN)
         repo.addMistake("physics", "ভেক্টর", "লব্ধির দিক নির্ণয়", "tanθ = Qsinα / (P + Qcosα)", "2026-11-24")
 
-        val backupJson = repo.exportJson()
+        val updatedSnapshot = repo.observeStudyState(null).first()
+        val backupJson = repo.exportJson(updatedSnapshot.persistedState)
         repo.resetAll()
-        assertEquals(0, repo.state.value?.mistakes?.size)
+        assertEquals(0, repo.observeStudyState(null).first().persistedState.mistakes.size)
 
         val imported = repo.importJson(backupJson)
         assertTrue(imported.isSuccess)
-        assertEquals(1, repo.state.value?.mistakes?.size)
+        val afterImport = repo.observeStudyState(null).first().persistedState
+        assertEquals(1, afterImport.mistakes.size)
         assertEquals(
             ChapterStatus.EXAM_TAKEN.name,
-            repo.state.value?.chapters?.first { it.id == "phy_1" }?.status
+            afterImport.chapters.first { it.id == "phy_1" }.status
         )
     }
 }

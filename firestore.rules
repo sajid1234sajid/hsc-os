@@ -1,0 +1,255 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.displayName is string && data.displayName.size() <= 120 &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 160)) &&
+             data.dailyHours is int && (data.dailyHours == 3 || data.dailyHours == 5) &&
+             data.language is string && data.language in ['BN', 'EN'] &&
+             data.darkMode is bool &&
+             data.notificationsEnabled is bool &&
+             data.reminderHour is int && data.reminderHour >= 0 && data.reminderHour <= 23 &&
+             data.reminderMinute is int && data.reminderMinute >= 0 && data.reminderMinute <= 59 &&
+             data.seededDefaultChapters is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidChapter(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.subjectId is string && data.subjectId.size() >= 1 && data.subjectId.size() <= 60 &&
+             data.subjectGroup is string && data.subjectGroup.size() >= 1 && data.subjectGroup.size() <= 60 &&
+             data.paper is string && data.paper.size() >= 1 && data.paper.size() <= 80 &&
+             data.startWeek is int && data.startWeek >= 1 && data.startWeek <= 26 &&
+             data.weekNumber is int && data.weekNumber >= 1 && data.weekNumber <= 26 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.deadline is string && data.deadline.size() == 10 &&
+             data.status is string && data.status in [
+               'NOT_STARTED',
+               'IN_PROGRESS',
+               'FIRST_READING_DONE',
+               'PRACTICE_DONE',
+               'REVISION_DONE',
+               'EXAM_TAKEN'
+             ] &&
+             data.editablePlaceholder is bool &&
+             data.sortOrder is int && data.sortOrder >= 0 && data.sortOrder <= 1000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidWeekRecord(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.weekNumber is int && data.weekNumber >= 1 && data.weekNumber <= 26 &&
+             data.weeklyTasks is list && data.weeklyTasks.size() <= 20 &&
+             (data.weeklyTasks.size() == 0 || data.weeklyTasks[0] is string) &&
+             data.fridayChecklist is list && data.fridayChecklist.size() <= 20 &&
+             (data.fridayChecklist.size() == 0 || data.fridayChecklist[0] is string) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidDailyLog(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.dateIso is string && data.dateIso.size() == 10 &&
+             data.completedSlots is list && data.completedSlots.size() <= 10 &&
+             (data.completedSlots.size() == 0 || data.completedSlots[0] is int) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidMistake(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.subjectId is string && data.subjectId.size() >= 1 && data.subjectId.size() <= 60 &&
+             data.subjectNameBn is string && data.subjectNameBn.size() >= 1 && data.subjectNameBn.size() <= 100 &&
+             data.subjectNameEn is string && data.subjectNameEn.size() >= 1 && data.subjectNameEn.size() <= 100 &&
+             data.chapterTitle is string && data.chapterTitle.size() <= 200 &&
+             data.question is string && data.question.size() >= 1 && data.question.size() <= 2000 &&
+             data.correctAnswer is string && data.correctAnswer.size() >= 1 && data.correctAnswer.size() <= 2000 &&
+             data.date is string && data.date.size() == 10 &&
+             data.revised is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if false;
+
+      allow create: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'displayName', 'dailyHours', 'language',
+                         'darkMode', 'notificationsEnabled', 'reminderHour',
+                         'reminderMinute', 'seededDefaultChapters', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'displayName', 'email', 'dailyHours', 'language',
+                         'darkMode', 'notificationsEnabled', 'reminderHour',
+                         'reminderMinute', 'seededDefaultChapters', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidUserProfile(incoming(), userId);
+
+      allow update: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'displayName', 'email', 'dailyHours', 'language',
+                         'darkMode', 'notificationsEnabled', 'reminderHour',
+                         'reminderMinute', 'seededDefaultChapters', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      match /chapters/{chapterId} {
+        allow get: if isOwner(userId) && isValidId(chapterId);
+        allow list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(chapterId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'subjectId', 'subjectGroup', 'paper',
+                           'startWeek', 'weekNumber', 'title', 'deadline',
+                           'status', 'editablePlaceholder', 'sortOrder',
+                           'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'subjectId', 'subjectGroup', 'paper',
+                           'startWeek', 'weekNumber', 'title', 'deadline',
+                           'status', 'editablePlaceholder', 'sortOrder',
+                           'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidChapter(incoming(), userId);
+
+        allow update: if isOwner(userId) &&
+                         isValidId(chapterId) &&
+                         isValidChapter(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         (
+                           incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']) ||
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'paper', 'startWeek', 'weekNumber', 'title', 'deadline',
+                             'status', 'editablePlaceholder', 'sortOrder', 'updatedAt'
+                           ])
+                         );
+
+        allow delete: if isOwner(userId) && isValidId(chapterId);
+      }
+
+      match /weekRecords/{weekId} {
+        allow get: if isOwner(userId) && isValidId(weekId);
+        allow list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(weekId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'weekNumber', 'weeklyTasks', 'fridayChecklist',
+                           'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'weekNumber', 'weeklyTasks', 'fridayChecklist',
+                           'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidWeekRecord(incoming(), userId);
+
+        allow update: if isOwner(userId) &&
+                         isValidId(weekId) &&
+                         isValidWeekRecord(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().weekNumber == existing().weekNumber &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'weeklyTasks', 'fridayChecklist', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(weekId);
+      }
+
+      match /dailyLogs/{dateIso} {
+        allow get: if isOwner(userId) && isValidId(dateIso);
+        allow list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(dateIso) &&
+                         incoming().keys().hasAll([
+                           'userId', 'dateIso', 'completedSlots', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'dateIso', 'completedSlots', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidDailyLog(incoming(), userId);
+
+        allow update: if isOwner(userId) &&
+                         isValidId(dateIso) &&
+                         isValidDailyLog(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().dateIso == existing().dateIso &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'completedSlots', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(dateIso);
+      }
+
+      match /mistakes/{mistakeId} {
+        allow get: if isOwner(userId) && isValidId(mistakeId);
+        allow list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(mistakeId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'subjectId', 'subjectNameBn', 'subjectNameEn',
+                           'chapterTitle', 'question', 'correctAnswer', 'date',
+                           'revised', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'subjectId', 'subjectNameBn', 'subjectNameEn',
+                           'chapterTitle', 'question', 'correctAnswer', 'date',
+                           'revised', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidMistake(incoming(), userId);
+
+        allow update: if isOwner(userId) &&
+                         isValidId(mistakeId) &&
+                         isValidMistake(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'revised', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(mistakeId);
+      }
+    }
+  }
+}

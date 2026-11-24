@@ -1,0 +1,324 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Per-user settings, profile metadata, and seed state for HSC 2028 study plan.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the owner."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Google account display name."
+        },
+        "email": {
+          "type": "string",
+          "description": "Google account email (optional, private to owner)."
+        },
+        "dailyHours": {
+          "type": "integer",
+          "description": "Daily study hours (3 or 5)."
+        },
+        "language": {
+          "type": "string",
+          "enum": ["BN", "EN"],
+          "description": "Preferred UI language."
+        },
+        "darkMode": {
+          "type": "boolean",
+          "description": "Whether dark mode is enabled."
+        },
+        "notificationsEnabled": {
+          "type": "boolean",
+          "description": "Whether study reminder notifications are enabled."
+        },
+        "reminderHour": {
+          "type": "integer",
+          "description": "Daily reminder hour (0-23)."
+        },
+        "reminderMinute": {
+          "type": "integer",
+          "description": "Daily reminder minute (0-59)."
+        },
+        "seededDefaultChapters": {
+          "type": "boolean",
+          "description": "True once initial chapters from study_plan.json have been seeded."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "dailyHours",
+        "language",
+        "darkMode",
+        "notificationsEnabled",
+        "reminderHour",
+        "reminderMinute",
+        "seededDefaultChapters",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserChapter": {
+      "title": "UserChapter",
+      "description": "A syllabus chapter tracked by the user with deadline and 6-stage progress status.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the owner."
+        },
+        "subjectId": {
+          "type": "string",
+          "description": "Subject identifier (e.g. physics, chemistry)."
+        },
+        "subjectGroup": {
+          "type": "string",
+          "description": "Routine group identifier."
+        },
+        "paper": {
+          "type": "string",
+          "description": "Paper label (e.g. ১ম পত্র)."
+        },
+        "startWeek": {
+          "type": "integer",
+          "description": "Start week number (1-26)."
+        },
+        "weekNumber": {
+          "type": "integer",
+          "description": "Target deadline week number (1-26)."
+        },
+        "title": {
+          "type": "string",
+          "description": "Chapter or unit title."
+        },
+        "deadline": {
+          "type": "string",
+          "description": "ISO date YYYY-MM-DD."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "NOT_STARTED",
+            "IN_PROGRESS",
+            "FIRST_READING_DONE",
+            "PRACTICE_DONE",
+            "REVISION_DONE",
+            "EXAM_TAKEN"
+          ],
+          "description": "Current completion status."
+        },
+        "editablePlaceholder": {
+          "type": "boolean",
+          "description": "True if chapter is an editable placeholder unit."
+        },
+        "sortOrder": {
+          "type": "integer",
+          "description": "Display order preserving PDF sequence."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "subjectId",
+        "subjectGroup",
+        "paper",
+        "startWeek",
+        "weekNumber",
+        "title",
+        "deadline",
+        "status",
+        "editablePlaceholder",
+        "sortOrder",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "WeekRecord": {
+      "title": "WeekRecord",
+      "description": "Weekly mandatory tasks and Friday exam checklist completion for a specific week.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the owner."
+        },
+        "weekNumber": {
+          "type": "integer",
+          "description": "Week number (1-26)."
+        },
+        "weeklyTasks": {
+          "type": "array",
+          "description": "List of completed mandatory task IDs."
+        },
+        "fridayChecklist": {
+          "type": "array",
+          "description": "List of completed Friday exam checklist IDs."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "weekNumber",
+        "weeklyTasks",
+        "fridayChecklist",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "DailyLog": {
+      "title": "DailyLog",
+      "description": "Completed daily study slots (1-4) for a given ISO date.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the owner."
+        },
+        "dateIso": {
+          "type": "string",
+          "description": "ISO date YYYY-MM-DD."
+        },
+        "completedSlots": {
+          "type": "array",
+          "description": "List of completed session slot numbers (1-4)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "dateIso",
+        "completedSlots",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Mistake": {
+      "title": "Mistake",
+      "description": "Mistake Notebook entry recording a wrong question, correct answer, and revision state.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the owner."
+        },
+        "subjectId": {
+          "type": "string",
+          "description": "Subject ID."
+        },
+        "subjectNameBn": {
+          "type": "string",
+          "description": "Bengali subject name."
+        },
+        "subjectNameEn": {
+          "type": "string",
+          "description": "English subject name."
+        },
+        "chapterTitle": {
+          "type": "string",
+          "description": "Optional chapter title."
+        },
+        "question": {
+          "type": "string",
+          "description": "Wrong question text."
+        },
+        "correctAnswer": {
+          "type": "string",
+          "description": "Correct answer and explanation."
+        },
+        "date": {
+          "type": "string",
+          "description": "ISO date YYYY-MM-DD."
+        },
+        "revised": {
+          "type": "boolean",
+          "description": "Whether the mistake has been revised."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "subjectId",
+        "subjectNameBn",
+        "subjectNameEn",
+        "chapterTitle",
+        "question",
+        "correctAnswer",
+        "date",
+        "revised",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profile, study preferences, and seed status isolated to the authenticated Google user."
+    },
+    "/users/{userId}/chapters/{chapterId}": {
+      "schema": { "$ref": "#/entities/UserChapter" },
+      "description": "Per-user syllabus chapters with deadlines and 6-stage progress status."
+    },
+    "/users/{userId}/weekRecords/{weekId}": {
+      "schema": { "$ref": "#/entities/WeekRecord" },
+      "description": "Per-user weekly mandatory tasks and Friday exam checklist states."
+    },
+    "/users/{userId}/dailyLogs/{dateIso}": {
+      "schema": { "$ref": "#/entities/DailyLog" },
+      "description": "Per-user daily session completion logs keyed by YYYY-MM-DD."
+    },
+    "/users/{userId}/mistakes/{mistakeId}": {
+      "schema": { "$ref": "#/entities/Mistake" },
+      "description": "Per-user Mistake Notebook entries."
+    }
+  }
+}

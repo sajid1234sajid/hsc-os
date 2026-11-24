@@ -1,8 +1,9 @@
 package com.example.ui.viewmodel
 
-import android.app.Application
+import android.content.Context
 import android.os.SystemClock
-import androidx.lifecycle.AndroidViewModel
+import android.util.Log
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.AppLanguage
 import com.example.data.AppPersistedState
@@ -11,14 +12,14 @@ import com.example.data.ChapterWithRollover
 import com.example.data.MistakeEntry
 import com.example.data.SessionTimerState
 import com.example.data.StringsProvider
+import com.example.data.StudyDataSource
 import com.example.data.StudyDateUtils
 import com.example.data.StudyPlanAsset
-import com.example.data.StudyRepository
-import com.example.data.SubjectAsset
 import com.example.data.TimerPhase
-import com.example.data.UserChapter
 import com.example.data.UserSettings
 import com.example.notifications.StudyNotificationHelper
+import com.google.firebase.firestore.FirebaseFirestoreException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,8 +28,27 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+
+class StudyReminderController(private val appContext: Context) {
+    fun ensureChannels() {
+        StudyNotificationHelper.ensureChannels(appContext)
+    }
+
+    fun showSessionNotification(title: String, body: String, notificationId: Int) {
+        StudyNotificationHelper.showSessionNotification(appContext, title, body, notificationId)
+    }
+
+    fun scheduleDailyReminder(hour: Int, minute: Int, enabled: Boolean) {
+        StudyNotificationHelper.scheduleDailyReminder(appContext, hour, minute, enabled)
+    }
+
+    fun showDailyReminderNotification(lang: AppLanguage) {
+        StudyNotificationHelper.showDailyReminderNotification(appContext, lang)
+    }
+}
 
 data class SubjectProgressSummary(
     val subjectId: String,
@@ -43,6 +63,10 @@ data class SubjectProgressSummary(
 
 data class StudyUiState(
     val isLoading: Boolean = true,
+    val syncError: String? = null,
+    val isCloudBacked: Boolean = false,
+    val hasPendingWrites: Boolean = false,
+    val isFromCache: Boolean = false,
     val todayIso: String = StudyDateUtils.todayIso(),
     val currentWeek: Int = StudyDateUtils.currentWeekNumber(),
     val isBeforePlanStart: Boolean = StudyDateUtils.isBeforePlanStart(),
@@ -66,8 +90,11 @@ data class StudyUiState(
     val rolloverCount: Int = 0
 )
 
-class StudyViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = StudyRepository(application)
+class StudyViewModel(
+    private val repository: StudyDataSource,
+    private val currentUserId: String?,
+    private val reminderController: StudyReminderController
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StudyUiState())
     val uiState: StateFlow<StudyUiState> = _uiState.asStateFlow()
@@ -75,7 +102,6 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
     private val _events = MutableSharedFlow<String>(extraBufferCapacity = 8)
     val events: SharedFlow<String> = _events.asSharedFlow()
 
-    // In-memory runtime timer state keyed by slot (1..4)
     private data class RuntimeTimer(
         var totalSeconds: Int,
         var remainingSeconds: Int,
@@ -88,16 +114,40 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
     private var lastTodayIso: String = StudyDateUtils.todayIso()
     private var tickerJob: Job? = null
     private var lastTickElapsedMs: Long = 0L
+    private var latestPersisted: AppPersistedState? = null
+    private var latestCloudBacked: Boolean = false
+    private var latestPendingWrites: Boolean = false
+    private var latestFromCache: Boolean = false
 
     init {
-        StudyNotificationHelper.ensureChannels(application)
+        reminderController.ensureChannels()
         viewModelScope.launch {
-            repository.initialize()
-            repository.state.collect { persisted ->
-                if (persisted != null) {
-                    rebuildUiState(persisted)
+            repository.initialize(currentUserId)
+            repository.observeStudyState(currentUserId)
+                .catch { error ->
+                    val firestoreError = generateSequence(error) { it.cause }
+                        .filterIsInstance<FirebaseFirestoreException>()
+                        .firstOrNull()
+                    if (firestoreError == null && error is CancellationException) throw error
+                    val rootError = firestoreError ?: error
+                    Log.w(TAG, "Error observing study state", rootError)
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        syncError = rootError.message ?: "Failed to sync study data"
+                    )
                 }
-            }
+                .collect { syncState ->
+                    latestPersisted = syncState.persistedState
+                    latestCloudBacked = syncState.isCloudBacked
+                    latestPendingWrites = syncState.hasPendingWrites
+                    latestFromCache = syncState.isFromCache
+                    rebuildUiState(
+                        persisted = syncState.persistedState,
+                        isCloudBacked = syncState.isCloudBacked,
+                        hasPendingWrites = syncState.hasPendingWrites,
+                        isFromCache = syncState.isFromCache
+                    )
+                }
         }
         startTicker()
     }
@@ -126,8 +176,7 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
                         if (timer.remainingSeconds == 0) {
                             timer.isRunning = false
                             if (currentSettings.notificationsEnabled) {
-                                StudyNotificationHelper.showSessionNotification(
-                                    getApplication(),
+                                reminderController.showSessionNotification(
                                     StringsProvider.text(lang, "সেশন $slot সম্পন্ন!", "Session $slot complete!"),
                                     StringsProvider.text(
                                         lang,
@@ -137,14 +186,15 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
                                     3000 + slot
                                 )
                             }
+                            val today = _uiState.value.todayIso
+                            val currentSlots = latestPersisted?.dailyCompletedSlots?.get(today).orEmpty()
                             viewModelScope.launch {
-                                repository.setDailySlotCompleted(_uiState.value.todayIso, slot, true)
+                                repository.setDailySlotCompleted(today, slot, true, currentSlots)
                             }
                         } else if (beforePhase != afterPhase) {
                             timer.lastPhase = afterPhase
                             if (currentSettings.notificationsEnabled) {
-                                StudyNotificationHelper.showSessionNotification(
-                                    getApplication(),
+                                reminderController.showSessionNotification(
                                     StringsProvider.text(lang, "নতুন ধাপ শুরু", "Next phase started"),
                                     "${StringsProvider.text(lang, "সেশন", "Session")} $slot: ${
                                         if (lang == AppLanguage.BN) afterPhase.labelBn else afterPhase.labelEn
@@ -160,8 +210,7 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
                     val nextBreak = (_uiState.value.breakRemainingSeconds - deltaSec).coerceAtLeast(0)
                     val stillRunning = nextBreak > 0
                     if (!stillRunning && currentSettings.notificationsEnabled) {
-                        StudyNotificationHelper.showSessionNotification(
-                            getApplication(),
+                        reminderController.showSessionNotification(
                             StringsProvider.text(lang, "বিরতি শেষ!", "Break finished!"),
                             StringsProvider.text(lang, "পরবর্তী সেশন শুরু করার সময় হয়েছে।", "Time to start your next session."),
                             3200
@@ -174,9 +223,8 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 if (changed) {
-                    val latestPersisted = repository.state.value
-                    if (latestPersisted != null) {
-                        rebuildUiState(latestPersisted)
+                    latestPersisted?.let {
+                        rebuildUiState(it, latestCloudBacked, latestPendingWrites, latestFromCache)
                     }
                 }
             }
@@ -193,7 +241,12 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun rebuildUiState(persisted: AppPersistedState) {
+    private fun rebuildUiState(
+        persisted: AppPersistedState,
+        isCloudBacked: Boolean,
+        hasPendingWrites: Boolean,
+        isFromCache: Boolean
+    ) {
         val plan = repository.getPlan()
         val todayIso = StudyDateUtils.todayIso()
         val currentWeek = StudyDateUtils.currentWeekNumber(todayIso)
@@ -248,7 +301,6 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
                 week = currentWeek,
                 chapters = chaptersWithRollover
             )
-            // Prioritize rolled-over or unfinished chapters first
             val activeChapter = matchingChapters.firstOrNull { !it.chapter.chapterStatus().isFinishedForRollover() }
                 ?: matchingChapters.firstOrNull()
 
@@ -296,6 +348,10 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
 
         _uiState.value = _uiState.value.copy(
             isLoading = false,
+            syncError = null,
+            isCloudBacked = isCloudBacked,
+            hasPendingWrites = hasPendingWrites,
+            isFromCache = isFromCache,
             todayIso = todayIso,
             currentWeek = currentWeek,
             isBeforePlanStart = StudyDateUtils.isBeforePlanStart(todayIso),
@@ -394,7 +450,6 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
         val timer = timerMap[slot] ?: return
         val willRun = !timer.isRunning
         if (willRun) {
-            // Pause any other active session so focus remains on one subject at a time
             timerMap.forEach { (k, v) ->
                 if (k != slot) v.isRunning = false
             }
@@ -404,14 +459,14 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
         }
         timer.isRunning = willRun
         lastTickElapsedMs = SystemClock.elapsedRealtime()
-        repository.state.value?.let { rebuildUiState(it) }
+        latestPersisted?.let { rebuildUiState(it, latestCloudBacked, latestPendingWrites, latestFromCache) }
     }
 
     fun resetSessionTimer(slot: Int) {
         val timer = timerMap[slot] ?: return
         timer.isRunning = false
         timer.remainingSeconds = timer.totalSeconds
-        repository.state.value?.let { rebuildUiState(it) }
+        latestPersisted?.let { rebuildUiState(it, latestCloudBacked, latestPendingWrites, latestFromCache) }
     }
 
     fun startBreakTimer(minutes: Int = 10) {
@@ -429,53 +484,76 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleSlotDone(slot: Int, done: Boolean) {
+        val today = _uiState.value.todayIso
+        val currentSlots = latestPersisted?.dailyCompletedSlots?.get(today).orEmpty()
         viewModelScope.launch {
-            repository.setDailySlotCompleted(_uiState.value.todayIso, slot, done)
+            repository.setDailySlotCompleted(today, slot, done, currentSlots)
         }
     }
 
     fun updateChapterStatus(chapterId: String, status: ChapterStatus) {
         viewModelScope.launch {
-            repository.updateChapterStatus(chapterId, status)
+            val result = repository.updateChapterStatus(chapterId, status)
+            if (result.isFailure) {
+                emitMutationError()
+            }
         }
     }
 
     fun editChapter(chapterId: String, newTitle: String, newDeadline: String, newWeekNumber: Int) {
         viewModelScope.launch {
-            repository.editChapter(chapterId, newTitle, newDeadline, newWeekNumber)
             val lang = _uiState.value.settings.appLanguage()
-            _events.emit(StringsProvider.text(lang, "অধ্যায় আপডেট হয়েছে", "Chapter updated"))
+            val result = repository.editChapter(chapterId, newTitle, newDeadline, newWeekNumber)
+            if (result.isSuccess) {
+                _events.emit(StringsProvider.text(lang, "অধ্যায় আপডেট হয়েছে", "Chapter updated"))
+            } else {
+                emitMutationError()
+            }
         }
     }
 
     fun addChapter(subjectId: String, paper: String, title: String, weekNumber: Int) {
         viewModelScope.launch {
-            repository.addChapter(subjectId, paper, title, weekNumber)
             val lang = _uiState.value.settings.appLanguage()
-            _events.emit(StringsProvider.text(lang, "নতুন অধ্যায় যোগ হয়েছে", "New chapter added"))
+            val count = _uiState.value.chaptersWithRollover.size
+            val result = repository.addChapter(subjectId, paper, title, weekNumber, count)
+            if (result.isSuccess) {
+                _events.emit(StringsProvider.text(lang, "নতুন অধ্যায় যোগ হয়েছে", "New chapter added"))
+            } else {
+                emitMutationError()
+            }
         }
     }
 
     fun deleteChapter(chapterId: String) {
         viewModelScope.launch {
-            repository.deleteChapter(chapterId)
+            val result = repository.deleteChapter(chapterId)
+            if (result.isFailure) {
+                emitMutationError()
+            }
         }
     }
 
     fun selectWeeklyViewWeek(week: Int) {
         _uiState.value = _uiState.value.copy(selectedWeeklyViewWeek = week.coerceIn(1, StudyDateUtils.TOTAL_WEEKS))
-        repository.state.value?.let { rebuildUiState(it) }
+        latestPersisted?.let { rebuildUiState(it, latestCloudBacked, latestPendingWrites, latestFromCache) }
     }
 
     fun toggleWeeklyTask(weekNumber: Int, taskId: String) {
+        val key = weekNumber.toString()
+        val tasks = _uiState.value.weeklyTasksCompleted[key].orEmpty()
+        val friday = _uiState.value.fridayChecklistCompleted[key].orEmpty()
         viewModelScope.launch {
-            repository.toggleWeeklyMandatoryTask(weekNumber, taskId)
+            repository.toggleWeeklyMandatoryTask(weekNumber, taskId, tasks, friday)
         }
     }
 
     fun toggleFridayChecklistItem(weekNumber: Int, itemId: String) {
+        val key = weekNumber.toString()
+        val tasks = _uiState.value.weeklyTasksCompleted[key].orEmpty()
+        val friday = _uiState.value.fridayChecklistCompleted[key].orEmpty()
         viewModelScope.launch {
-            repository.toggleFridayChecklistItem(weekNumber, itemId)
+            repository.toggleFridayChecklistItem(weekNumber, itemId, tasks, friday)
         }
     }
 
@@ -487,15 +565,20 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
         dateIso: String
     ) {
         viewModelScope.launch {
-            repository.addMistake(subjectId, chapterTitle, question, correctAnswer, dateIso)
             val lang = _uiState.value.settings.appLanguage()
-            _events.emit(StringsProvider.text(lang, "ভুলের খাতায় সংরক্ষিত হয়েছে", "Saved to Mistake Notebook"))
+            val result = repository.addMistake(subjectId, chapterTitle, question, correctAnswer, dateIso)
+            if (result.isSuccess) {
+                _events.emit(StringsProvider.text(lang, "ভুলের খাতায় সংরক্ষিত হয়েছে", "Saved to Mistake Notebook"))
+            } else {
+                emitMutationError()
+            }
         }
     }
 
     fun toggleMistakeRevised(mistakeId: String) {
+        val currentRevised = _uiState.value.mistakes.firstOrNull { it.id == mistakeId }?.revised ?: false
         viewModelScope.launch {
-            repository.toggleMistakeRevised(mistakeId)
+            repository.toggleMistakeRevised(mistakeId, currentRevised)
         }
     }
 
@@ -506,45 +589,58 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setDailyHours(hours: Int) {
-        viewModelScope.launch {
-            repository.updateSettings { it.copy(dailyHours = if (hours <= 3) 3 else 5) }
-        }
+        val updated = _uiState.value.settings.copy(dailyHours = if (hours <= 3) 3 else 5)
+        viewModelScope.launch { repository.updateSettings(updated) }
     }
 
     fun setLanguage(lang: AppLanguage) {
-        viewModelScope.launch {
-            repository.updateSettings { it.copy(language = lang.name) }
-        }
+        val updated = _uiState.value.settings.copy(language = lang.name)
+        viewModelScope.launch { repository.updateSettings(updated) }
     }
 
     fun toggleDarkMode(dark: Boolean) {
-        viewModelScope.launch {
-            repository.updateSettings { it.copy(darkMode = dark) }
-        }
+        val updated = _uiState.value.settings.copy(darkMode = dark)
+        viewModelScope.launch { repository.updateSettings(updated) }
     }
 
-    fun setNotificationsEnabled(enabled: Boolean, hour: Int = _uiState.value.settings.reminderHour, minute: Int = _uiState.value.settings.reminderMinute) {
+    fun setNotificationsEnabled(
+        enabled: Boolean,
+        hour: Int = _uiState.value.settings.reminderHour,
+        minute: Int = _uiState.value.settings.reminderMinute
+    ) {
+        val updated = _uiState.value.settings.copy(
+            notificationsEnabled = enabled,
+            reminderHour = hour,
+            reminderMinute = minute
+        )
         viewModelScope.launch {
-            repository.updateSettings {
-                it.copy(notificationsEnabled = enabled, reminderHour = hour, reminderMinute = minute)
-            }
-            StudyNotificationHelper.scheduleDailyReminder(getApplication(), hour, minute, enabled)
+            repository.updateSettings(updated)
+            reminderController.scheduleDailyReminder(hour, minute, enabled)
         }
     }
 
     fun sendTestNotification() {
         val lang = _uiState.value.settings.appLanguage()
-        StudyNotificationHelper.showDailyReminderNotification(getApplication(), lang)
+        reminderController.showDailyReminderNotification(lang)
     }
 
-    suspend fun exportBackupJson(): String = repository.exportJson()
+    fun exportBackupJson(): String {
+        val snapshot = latestPersisted ?: AppPersistedState(
+            settings = _uiState.value.settings,
+            chapters = _uiState.value.chaptersWithRollover.map { it.chapter },
+            weeklyTasksCompleted = _uiState.value.weeklyTasksCompleted,
+            fridayChecklistCompleted = _uiState.value.fridayChecklistCompleted,
+            mistakes = _uiState.value.mistakes
+        )
+        return repository.exportJson(snapshot)
+    }
 
     fun importBackupJson(json: String) {
         viewModelScope.launch {
             val lang = _uiState.value.settings.appLanguage()
             val result = repository.importJson(json)
             if (result.isSuccess) {
-                _events.emit(StringsProvider.text(lang, "ব্যাকআপ সফলভাবে ইমপোর্ট হয়েছে", "Backup restored successfully"))
+                _events.emit(StringsProvider.text(lang, "ব্যাকআপ সফলভাবে সিঙ্ক ও ইমপোর্ট হয়েছে", "Backup imported & synced"))
             } else {
                 _events.emit(StringsProvider.text(lang, "ফাইলটি সঠিক JSON নয়", "Invalid JSON backup file"))
             }
@@ -554,9 +650,28 @@ class StudyViewModel(application: Application) : AndroidViewModel(application) {
     fun resetAllData() {
         viewModelScope.launch {
             timerMap.clear()
-            repository.resetAll()
+            val result = repository.resetAll()
             val lang = _uiState.value.settings.appLanguage()
-            _events.emit(StringsProvider.text(lang, "সব ডেটা রিসেট করা হয়েছে", "All progress reset to default"))
+            if (result.isSuccess) {
+                _events.emit(StringsProvider.text(lang, "সব ডেটা রিসেট করা হয়েছে", "All progress reset to default"))
+            } else {
+                emitMutationError()
+            }
         }
+    }
+
+    fun currentPersistedSnapshot(): AppPersistedState? = latestPersisted
+
+    fun stopRuntimeTicker() {
+        tickerJob?.cancel()
+    }
+
+    private suspend fun emitMutationError() {
+        val lang = _uiState.value.settings.appLanguage()
+        _events.emit(StringsProvider.text(lang, "ডেটা সেভ করতে সমস্যা হয়েছে", "Could not save changes"))
+    }
+
+    private companion object {
+        const val TAG = "StudyViewModel"
     }
 }

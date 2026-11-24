@@ -23,16 +23,23 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,6 +65,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CredentialManager
+import com.example.auth.onGoogleSignInClicked
 import com.example.data.AppLanguage
 import com.example.data.StringsProvider
 import com.example.data.StudyDateUtils
@@ -71,6 +80,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(
     state: StudyUiState,
+    isSignedIn: Boolean,
+    userDisplayName: String,
+    userEmail: String?,
+    onSignInSuccess: () -> Unit,
+    onSignOut: () -> Unit,
     onSetDailyHours: (Int) -> Unit,
     onSetLanguage: (AppLanguage) -> Unit,
     onToggleDarkMode: (Boolean) -> Unit,
@@ -79,13 +93,14 @@ fun SettingsScreen(
     onEditChapter: (String, String, String, Int) -> Unit,
     onAddChapter: (String, String, String, Int) -> Unit,
     onDeleteChapter: (String) -> Unit,
-    onExportJson: suspend () -> String,
+    onExportJson: () -> String,
     onImportJson: (String) -> Unit,
     onResetAll: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val credentialManager = remember(context) { CredentialManager.create(context) }
     val lang = state.settings.appLanguage()
     val subjects = state.plan?.subjects.orEmpty()
 
@@ -94,6 +109,7 @@ fun SettingsScreen(
     var showAddChapter by remember { mutableStateOf(false) }
     var showResetConfirm by remember { mutableStateOf(false) }
     var statusNotice by remember { mutableStateOf<String?>(null) }
+    var isSigningIn by remember { mutableStateOf(false) }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -170,6 +186,196 @@ fun SettingsScreen(
                                 .fillMaxWidth()
                                 .padding(12.dp)
                         )
+                    }
+                }
+            }
+
+            // Google Account & Optional Cloud Sync
+            item {
+                SettingsSectionCard(
+                    title = StringsProvider.text(
+                        lang,
+                        "ক্লাউড সিঙ্ক ও Google অ্যাকাউন্ট (ঐচ্ছিক)",
+                        "Cloud Sync & Google Account (Optional)"
+                    )
+                ) {
+                    if (!isSignedIn) {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.CloudOff,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Text(
+                                    text = StringsProvider.text(
+                                        lang,
+                                        "বর্তমানে অফলাইন লোকাল মোডে চলছে — লগইন ছাড়াই সব পড়া ও রুটিন এই ডিভাইসে সেভ থাকছে। অন্য ডিভাইস বা মোবাইলে সিঙ্ক করতে চাইলে Google দিয়ে সাইন-ইন করুন।",
+                                        "Running in offline local mode — all progress saves on this device without login. Sign in with Google anytime to sync across devices."
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            }
+                        }
+
+                        Button(
+                            onClick = {
+                                if (!isSigningIn) {
+                                    isSigningIn = true
+                                    statusNotice = null
+                                    onGoogleSignInClicked(
+                                        context = context,
+                                        credentialManager = credentialManager,
+                                        onAuthSuccess = {
+                                            isSigningIn = false
+                                            statusNotice = StringsProvider.text(
+                                                lang,
+                                                "Google দিয়ে সাইন-ইন সফল হয়েছে! অগ্রগতি ক্লাউডে সিঙ্ক হচ্ছে।",
+                                                "Signed in with Google! Your progress is syncing to the cloud."
+                                            )
+                                            onSignInSuccess()
+                                        },
+                                        onAuthError = { msg ->
+                                            isSigningIn = false
+                                            statusNotice = msg
+                                        },
+                                        onAuthCancelled = {
+                                            isSigningIn = false
+                                        },
+                                        scope = scope
+                                    )
+                                }
+                            },
+                            enabled = !isSigningIn,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .minimumInteractiveComponentSize()
+                                .testTag("google_sign_in_button")
+                        ) {
+                            if (isSigningIn) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(StringsProvider.text(lang, "সাইন-ইন হচ্ছে...", "Signing in..."))
+                            } else {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Login,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    StringsProvider.text(
+                                        lang,
+                                        "Google দিয়ে ক্লাউড সিঙ্ক চালু করুন",
+                                        "Sign in with Google for Cloud Sync"
+                                    )
+                                )
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.AccountCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(40.dp)
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = userDisplayName.ifBlank { StringsProvider.text(lang, "শিক্ষার্থী", "Student") },
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                if (!userEmail.isNullOrBlank()) {
+                                    Text(
+                                        text = userEmail,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
+                        val syncIcon = when {
+                            state.hasPendingWrites -> Icons.Filled.Sync
+                            state.isFromCache -> Icons.Filled.CloudOff
+                            else -> Icons.Filled.CloudDone
+                        }
+                        val syncText = when {
+                            state.hasPendingWrites -> StringsProvider.text(
+                                lang,
+                                "অফলাইন পরিবর্তন সেভড — Wi-Fi এলে অটো আপডেট হবে",
+                                "Offline changes saved — will auto-sync when online"
+                            )
+                            state.isFromCache -> StringsProvider.text(
+                                lang,
+                                "অফলাইন ক্যাশ মোড চালু — Wi-Fi এলে সিঙ্ক হবে",
+                                "Offline cache active — auto-syncs on Wi-Fi"
+                            )
+                            else -> StringsProvider.text(
+                                lang,
+                                "ক্লাউড ডাটাবেসের সাথে লাইভ সিঙ্কড",
+                                "Synced live with Cloud Firestore"
+                            )
+                        }
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (state.hasPendingWrites || state.isFromCache) {
+                                MaterialTheme.colorScheme.secondaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.primaryContainer
+                            }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = syncIcon,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = syncText,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+
+                        OutlinedButton(
+                            onClick = onSignOut,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .minimumInteractiveComponentSize()
+                                .testTag("sign_out_button")
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(StringsProvider.text(lang, "সাইন-আউট করুন (লোকাল মোডে থাকুন)", "Sign Out (Keep Local Mode)"))
+                        }
                     }
                 }
             }

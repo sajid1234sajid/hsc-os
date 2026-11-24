@@ -55,6 +55,8 @@ jobs:
 
       - name: Build Windows NSIS installer
         working-directory: ./desktop-app
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
         run: npm run build-win
 
       - name: Upload Windows .exe Installer
